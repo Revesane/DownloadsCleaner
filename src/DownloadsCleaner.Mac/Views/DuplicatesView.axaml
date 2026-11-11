@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.DuplicatesView">
+
+    <Grid Margin="24,4,24,24" RowDefinitions="Auto,Auto,*">
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="{loc:T NavDuplicates}" Classes="title" />
+            <TextBlock Text="{Binding Summary}" Classes="caption" Margin="0,4,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+            <Button Content="{loc:T DupFind}" Command="{Binding FindCommand}" Classes="primary" />
+            <ComboBox MinWidth="240" ItemsSource="{Binding StrategyOptions}" SelectedValue="{Binding Strategy, Mode=TwoWay}" SelectedValueBinding="{Binding Value}"
+                      ItemTemplate="{StaticResource OptionItemTemplate}"
+                      IsVisible="{Binding HasResults, Converter={StaticResource BoolToVis}}" />
+            <Button Content="{loc:T DupApplySelection}" Command="{Binding AutoSelectCommand}" Classes="secondary"
+                    IsVisible="{Binding HasResults, Converter={StaticResource BoolToVis}}" />
+            <Button Content="{loc:T DupClearMarks}" Command="{Binding ClearMarksCommand}" Classes="ghost"
+                    IsVisible="{Binding HasResults, Converter={StaticResource BoolToVis}}" />
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <ListBox ItemsSource="{Binding Groups}" Background="Transparent" BorderThickness="0"
+                     IsVisible="{Binding HasResults, Converter={StaticResource BoolToVis}}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="vm:DuplicateGroupViewModel">
+                        <Border Classes="card" Margin="0,0,0,10" Padding="14">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Classes="caption">
+                                            <Run Text="{Binding CopiesText, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding SizeText, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" CornerRadius="8" Padding="8,3" Background="{DynamicResource SuccessSoftBrush}">
+                                        <TextBlock Text="{Binding WastedText}" Foreground="{DynamicResource SuccessBrush}" FontSize="11" />
+                                    </Border>
+                                </Grid>
+
+                                <ItemsControl ItemsSource="{Binding Files}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="vm:DuplicateFileViewModel">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2">
+                                                <CheckBox IsChecked="{Binding IsMarked, Mode=TwoWay}" VerticalAlignment="Center"
+                                                          ToolTip.Tip="{loc:T DupSendOne}" />
+                                                <TextBlock Grid.Column="1" Text="{Binding FullPath}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Text="{Binding CreatedText}" Classes="caption" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="420"
+                        IsVisible="{Binding HasResults, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                <TextBlock Text="⧉" FontSize="34" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                <TextBlock Text="{loc:T DupExactTitle}" Classes="heading" HorizontalAlignment="Center" Margin="0,12,0,6" />
+                <TextBlock Text="{loc:T DupExactHint}" Classes="caption" TextWrapping="Wrap" TextAlignment="Center" />
+            </StackPanel>
+
+            <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" Padding="14,10" CornerRadius="12"
+                    Background="{DynamicResource BgElevatedBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+                    IsVisible="{Binding MarkedCount, Converter={StaticResource InverseBool}, ConverterParameter=invert}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock FontWeight="SemiBold" VerticalAlignment="Center">
+                        <Run Text="{loc:T DupMarkedPrefix}" /><Run Text="{Binding MarkedCount, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding MarkedBytesText, Mode=OneWay}" />
+                    </TextBlock>
+                    <Button Content="{loc:T DupDeleteMarked}" Command="{Binding DeleteMarkedCommand}" Classes="danger" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

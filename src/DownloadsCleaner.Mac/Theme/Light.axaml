@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Светлая тема: те же токены, но светлые значения. -->
+    <SolidColorBrush x:Key="BgBaseBrush" Color="#F5F6FA" />
+    <SolidColorBrush x:Key="BgSidebarBrush" Color="#EFF1F7" />
+    <SolidColorBrush x:Key="BgCardBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="BgCardHoverBrush" Color="#F0F2F8" />
+    <SolidColorBrush x:Key="BgInputBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="BgElevatedBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="StrokeBrush" Color="#E2E5EE" />
+    <SolidColorBrush x:Key="StrokeStrongBrush" Color="#C9CEDD" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1B1D26" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#5C6076" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="#8A90A4" />
+    <SolidColorBrush x:Key="HoverOverlayBrush" Color="#0A000000" />
+    <SolidColorBrush x:Key="PressOverlayBrush" Color="#14000000" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#7C4DEF" />
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="#3B7BE8" />
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="#228B5CF6" />
+    <SolidColorBrush x:Key="AccentBlueSoftBrush" Color="#224F8CF0" />
+    <SolidColorBrush x:Key="OnAccentBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#16A34A" />
+    <SolidColorBrush x:Key="SuccessSoftBrush" Color="#2234D399" />
+    <SolidColorBrush x:Key="WarningBrush" Color="#D97706" />
+    <SolidColorBrush x:Key="WarningSoftBrush" Color="#22FBBF24" />
+    <SolidColorBrush x:Key="DangerBrush" Color="#DC2626" />
+    <SolidColorBrush x:Key="DangerSoftBrush" Color="#22F87171" />
+    <SolidColorBrush x:Key="ScrimBrush" Color="#66070810" />
+    <SolidColorBrush x:Key="ShadowColor" Color="#404040" />
+</ResourceDictionary>

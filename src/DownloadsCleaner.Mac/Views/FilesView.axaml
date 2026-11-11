@@ -1,0 +1,97 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:views="clr-namespace:DownloadsCleaner.Mac.Views"
+             xmlns:conv="clr-namespace:DownloadsCleaner.Mac.Converters"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.FilesView">
+
+    <Grid ColumnDefinitions="*,Auto">
+        <Grid Grid.Column="0" Margin="24,4,16,0" RowDefinitions="Auto,Auto,Auto,*">
+
+            <!-- Заголовок -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock Text="{Binding Title}" Classes="title" />
+                <TextBlock Text="{Binding Summary}" Classes="caption" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Панель инструментов -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,10">
+                <TextBox Grid.Column="0" Text="{Binding SearchText}" Watermark="{loc:T FilesSearchHint}" MinWidth="180" MaxWidth="320" />
+                <ComboBox Grid.Column="1" Margin="10,0,0,0" MinWidth="160"
+                          ItemsSource="{Binding CategoryOptions}" SelectedValue="{Binding CategoryValue, Mode=TwoWay}" SelectedValueBinding="{Binding Value}"
+                          ItemTemplate="{StaticResource CategoryOptionTemplate}" />
+                <Button Grid.Column="2" Margin="10,0,0,0" Content="{loc:T FilesFilters}" Command="{Binding ToggleFiltersCommand}" Classes="secondary" />
+                <ToggleButton Grid.Column="3" Margin="10,0,0,0" Classes="secondary" IsChecked="{Binding PreviewOpen, Mode=TwoWay}"
+                              Content="{loc:T FilesPreviewHeader}" />
+            </Grid>
+
+            <!-- Фильтры -->
+            <Border Grid.Row="2" Classes="card" Padding="12" Margin="0,0,0,10"
+                    IsVisible="{Binding FiltersExpanded, Converter={StaticResource BoolToVis}}">
+                <WrapPanel>
+                    <ComboBox MinWidth="160" Margin="0,0,10,0" ItemsSource="{Binding AgeOptions}"
+                              SelectedValue="{Binding AgeDays, Mode=TwoWay}" SelectedValueBinding="{Binding Value}" ItemTemplate="{StaticResource OptionItemTemplate}" />
+                    <ComboBox MinWidth="160" Margin="0,0,10,0" ItemsSource="{Binding SizeOptions}"
+                              SelectedValue="{Binding MinSizeMb, Mode=TwoWay}" SelectedValueBinding="{Binding Value}" ItemTemplate="{StaticResource OptionItemTemplate}" />
+                    <ComboBox MinWidth="220" Margin="0,0,10,0" ItemsSource="{Binding RuleOptions}"
+                              SelectedValue="{Binding Rule, Mode=TwoWay}" SelectedValueBinding="{Binding Value}" ItemTemplate="{StaticResource OptionItemTemplate}" />
+                    <Button Content="{loc:T FilesResetFilters}" Command="{Binding ClearFiltersCommand}" Classes="ghost" />
+                    <Button Content="{loc:T FilesSelectAll}" Command="{Binding SelectAllCommand}" Classes="secondary" Margin="6,0,0,0" />
+                </WrapPanel>
+            </Border>
+
+            <!-- Список -->
+            <Grid Grid.Row="3">
+                <ListBox ItemsSource="{Binding Items}" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="vm:FileItemViewModel">
+                            <Grid ColumnDefinitions="Auto,*,100,80,110" Margin="0,2">
+                                <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Folder}" Classes="caption" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{Binding CategoryTitle}" Classes="caption" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="3" Text="{Binding SizeText}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="4" Text="{Binding CreatedText}" Classes="caption" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Пустое состояние -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            IsVisible="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="∅" FontSize="36" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="{loc:T FilesNothingFound}" Classes="heading" HorizontalAlignment="Center" Margin="0,10,0,4" />
+                    <TextBlock Text="{loc:T FilesEmptyCategoryHint}" Classes="caption" HorizontalAlignment="Center"
+                               MaxWidth="360" TextWrapping="Wrap" TextAlignment="Center"
+                               IsVisible="{Binding HasActiveFilters, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
+                    <TextBlock Text="{loc:T FilesNoResultsHint}" Classes="caption" HorizontalAlignment="Center"
+                               MaxWidth="360" TextWrapping="Wrap" TextAlignment="Center"
+                               IsVisible="{Binding HasActiveFilters, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+
+                <!-- Панель выбранных файлов -->
+                <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" Padding="14,10" CornerRadius="12"
+                        Background="{DynamicResource BgElevatedBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+                        IsVisible="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="{Binding SelectionSummary}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Button Content="{loc:T FilesSort}" Command="{Binding SortSelectedCommand}" Classes="secondary" />
+                        <Button Content="{loc:T FilesDelete}" Command="{Binding DeleteSelectedCommand}" Classes="danger" />
+                        <Button Content="{loc:T FilesDeselect}" Command="{Binding ClearSelectionCommand}" Classes="ghost" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Панель предпросмотра -->
+        <Border Grid.Column="1" Width="300" Padding="12" Background="{DynamicResource BgSidebarBrush}"
+                BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1,0,0,0"
+                IsVisible="{Binding PreviewOpen, Converter={StaticResource BoolToVis}}">
+            <views:PreviewPanel DataContext="{Binding Preview}" />
+        </Border>
+    </Grid>
+</UserControl>

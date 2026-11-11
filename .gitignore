@@ -1,0 +1,8 @@
+bin/
+obj/
+publish/
+Portable/
+*.log
+*.user
+.vs/
+.DS_Store

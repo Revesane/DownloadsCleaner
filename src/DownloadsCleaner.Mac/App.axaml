@@ -1,0 +1,55 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:views="clr-namespace:DownloadsCleaner.Mac.Views"
+             xmlns:conv="clr-namespace:DownloadsCleaner.Mac.Converters"
+             x:Class="DownloadsCleaner.Mac.App"
+             RequestedThemeVariant="Dark">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://DownloadsCleaner.Mac/Theme/Dark.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Пункты выпадающих списков: живая привязка к подписи, поэтому подпись
+                 обновляется при смене языка интерфейса. -->
+            <DataTemplate x:Key="OptionItemTemplate">
+                <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+
+            <DataTemplate x:Key="CategoryOptionTemplate">
+                <TextBlock Text="{Binding Title}" />
+            </DataTemplate>
+
+            <!-- Конвертеры доступны всем страницам. -->
+            <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+            <conv:NullToVisibilityConverter x:Key="NullToVis" />
+            <conv:InverseBoolConverter x:Key="InverseBool" />
+            <conv:BytesConverter x:Key="Bytes" />
+            <conv:MultiplyConverter x:Key="Mul" />
+            <conv:EqualsConverter x:Key="Equals" />
+            <conv:CategoryToTitleConverter x:Key="CategoryTitle" />
+            <conv:CategoryToBrushConverter x:Key="CategoryBrush" />
+            <conv:AppStateToBrushConverter x:Key="StateBrush" />
+            <conv:ToastKindToBrushConverter x:Key="ToastBrush" />
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.DataTemplates>
+        <DataTemplate DataType="vm:HomeViewModel"><views:HomeView /></DataTemplate>
+        <DataTemplate DataType="vm:FileListViewModel"><views:FilesView /></DataTemplate>
+        <DataTemplate DataType="vm:DuplicatesViewModel"><views:DuplicatesView /></DataTemplate>
+        <DataTemplate DataType="vm:HistoryViewModel"><views:HistoryView /></DataTemplate>
+        <DataTemplate DataType="vm:AnalyticsViewModel"><views:AnalyticsView /></DataTemplate>
+        <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
+        <DataTemplate DataType="vm:ConfirmDialogViewModel"><views:ConfirmDialogView /></DataTemplate>
+        <DataTemplate DataType="vm:DeleteConfirmDialogViewModel"><views:DeleteConfirmDialogView /></DataTemplate>
+        <DataTemplate DataType="vm:SortPreviewDialogViewModel"><views:SortPreviewDialogView /></DataTemplate>
+        <DataTemplate DataType="vm:ErrorListDialogViewModel"><views:ErrorListDialogView /></DataTemplate>
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://DownloadsCleaner.Mac/Theme/Theme.axaml" />
+    </Application.Styles>
+</Application>

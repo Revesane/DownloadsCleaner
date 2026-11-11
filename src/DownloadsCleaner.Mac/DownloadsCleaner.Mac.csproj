@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+    <AssemblyName>DownloadsCleaner.Mac</AssemblyName>
+    <RootNamespace>DownloadsCleaner</RootNamespace>
+    <Version>1.0.0</Version>
+    <Product>Downloads Cleaner</Product>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.23" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.23" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.23" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.23" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\DownloadsCleaner\Models\**\*.cs" />
+    <Compile Include="..\DownloadsCleaner\Localization\Loc.cs" />
+    <Compile Include="..\DownloadsCleaner\Localization\StringsRu.cs" />
+    <Compile Include="..\DownloadsCleaner\Localization\StringsEn.cs" />
+    <Compile Include="..\DownloadsCleaner\Helpers\Helpers.cs" />
+    <Compile Include="..\DownloadsCleaner\Helpers\UiDebouncer.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\PlatformServices.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\IThemeService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\AppStatus.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\DialogService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\DuplicateDetectionService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\FileDeletionService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\FileLibrary.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\FileOrganizationService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\FileScannerService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\FileTypeDetectionService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\FileWatcherService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\HistoryService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\LogService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\OperationsCoordinator.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\RecycleBinQuota.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\SettingsService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\ToastService.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\AnalyticsViewModel.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\DialogViewModels.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\DuplicatesViewModel.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\FileItemViewModel.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\FileListViewModel.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\HistoryViewModel.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\HomeViewModel.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\SettingsViewModel.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\ShellViewModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System.IO" />
+    <Using Include="System.Threading" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="System.Net.Http" />
+  </ItemGroup>
+</Project>

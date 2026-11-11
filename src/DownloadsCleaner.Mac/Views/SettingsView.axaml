@@ -1,0 +1,270 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.SettingsView">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,4,24,24" MaxWidth="760" HorizontalAlignment="Left" Spacing="14">
+
+            <StackPanel>
+                <TextBlock Text="{loc:T SettingsTitle}" Classes="title" />
+                <TextBlock Text="{loc:T SettingsSubtitle}" Classes="caption" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Папки -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="{loc:T SettingsFolders}" Classes="heading" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsDownloadsFolder}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Settings.DownloadsPath}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                            <Button Content="{loc:T CommonChange}" Command="{Binding ChangeDownloadsPathCommand}" Classes="secondary" />
+                            <Button Content="{loc:T CommonDefault}" Command="{Binding ResetDownloadsPathCommand}" Classes="ghost" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsSortDestination}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding DestinationText}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                            <Button Content="{loc:T CommonChange}" Command="{Binding ChangeSortDestinationCommand}" Classes="secondary" />
+                            <Button Content="{loc:T CommonReset}" Command="{Binding ResetSortDestinationCommand}" Classes="ghost" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsScanSubfolders}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T SettingsScanSubfoldersHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.IncludeSubfolders, Mode=TwoWay}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Поведение -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="{loc:T SettingsBehavior}" Classes="heading" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsScanOnStartup}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T SettingsScanOnStartupHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.ScanOnStartup, Mode=TwoWay}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsWatchNewFiles}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T SettingsWatchNewFilesHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.WatchNewFiles, Mode=TwoWay}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsAutoSort}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T SettingsAutoSortHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.AutoSortNewFiles, Mode=TwoWay}"
+                                      IsEnabled="{Binding Settings.WatchNewFiles}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:T SettingsOldPeriod}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" MinWidth="150" ItemsSource="{Binding OldDaysOptions}"
+                                  SelectedValue="{Binding OldDaysValue, Mode=TwoWay}" SelectedValueBinding="{Binding Value}"
+                                  ItemTemplate="{StaticResource OptionItemTemplate}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Уведомления -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="{loc:T SettingsNotifications}" Classes="heading" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsShowNotifications}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T SettingsShowNotificationsHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.ShowNotifications, Mode=TwoWay}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:T SettingsNotifyNewFiles}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.NotifyOnNewFiles, Mode=TwoWay}"
+                                      IsEnabled="{Binding Settings.ShowNotifications}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:T SettingsToastTime}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" MinWidth="150" ItemsSource="{Binding ToastSecondsOptions}"
+                                  SelectedValue="{Binding ToastSecondsValue, Mode=TwoWay}" SelectedValueBinding="{Binding Value}"
+                                  ItemTemplate="{StaticResource OptionItemTemplate}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Оформление -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="{loc:T SettingsAppearance}" Classes="heading" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:T SettingsTheme}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" MinWidth="170" ItemsSource="{Binding ThemeOptions}"
+                                  SelectedValue="{Binding ThemeValue, Mode=TwoWay}" SelectedValueBinding="{Binding Value}"
+                                  ItemTemplate="{StaticResource OptionItemTemplate}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:T SettingsLanguage}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" MinWidth="170" ItemsSource="{Binding LanguageOptions}"
+                                  SelectedValue="{Binding LanguageValue, Mode=TwoWay}" SelectedValueBinding="{Binding Value}"
+                                  ItemTemplate="{StaticResource OptionItemTemplate}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsAnimations}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T SettingsAnimationsHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.AnimationsEnabled, Mode=TwoWay}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Безопасность -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="{loc:T SettingsSecurity}" Classes="heading" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsAllowHashing}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T SettingsAllowHashingHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.AllowContentHashing, Mode=TwoWay}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T SettingsAllowPermanent}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T SettingsAllowPermanentHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding Settings.AllowPermanentDelete, Mode=TwoWay}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Исключения -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="{loc:T SettingsRules}" Classes="heading" />
+
+                    <StackPanel>
+                        <TextBlock Text="{loc:T SettingsExcludedExtensions}" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:T SettingsExcludedExtensionsHint}" Classes="caption" Margin="0,2,0,6" TextWrapping="Wrap" />
+                        <TextBox Text="{Binding ExcludedExtensionsText}" Watermark="{Binding ExcludedExtensionsPlaceholder}" />
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Text="{loc:T SettingsExcludedFolders}" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:T SettingsExcludedFoldersHint}" Classes="caption" Margin="0,2,0,6" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding Settings.ExcludedFolders}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+                                        <Border Background="{DynamicResource BgInputBrush}" CornerRadius="8" Padding="10,6">
+                                            <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+                                        </Border>
+                                        <Button Grid.Column="1" Content="✕" Classes="icon" Margin="6,0,0,0"
+                                                ToolTip.Tip="{loc:T CommonRemove}"
+                                                Command="{Binding DataContext.RemoveExcludedFolderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="{loc:T SettingsAddFolder}" Command="{Binding AddExcludedFolderCommand}"
+                                Classes="secondary" HorizontalAlignment="Left" />
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Text="{loc:T SettingsCustomRules}" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:T SettingsCustomRulesHint}" Classes="caption" Margin="0,2,0,6" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding Settings.CustomRules}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="160,*,Auto" Margin="0,0,0,6">
+                                        <TextBox Text="{Binding Extension}" Watermark="{Binding DataContext.RuleExtensionPlaceholder, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                        <ComboBox Grid.Column="1" Margin="8,0,0,0" MinWidth="160"
+                                                  ItemsSource="{Binding DataContext.Categories, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  SelectedItem="{Binding Category}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Converter={StaticResource CategoryTitle}}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                        <Button Grid.Column="2" Content="✕" Classes="icon" Margin="6,0,0,0"
+                                                ToolTip.Tip="{loc:T SettingsRemoveRule}"
+                                                Command="{Binding DataContext.RemoveRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                            <Button Content="{loc:T SettingsAddRule}" Command="{Binding AddRuleCommand}" Classes="secondary" />
+                            <Button Content="{loc:T SettingsApplyRules}" Command="{Binding ApplyRulesCommand}" Classes="primary" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- О программе -->
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{loc:T SettingsAbout}" Classes="heading" />
+                    <TextBlock Text="{Binding Version}" />
+                    <TextBlock Classes="caption"><Run Text="{loc:T SettingsPathLabel}" /><Run Text="{Binding SettingsPath, Mode=OneWay}" /></TextBlock>
+                    <TextBlock Classes="caption"><Run Text="{loc:T SettingsLogLabel}" /><Run Text="{Binding LogDirectory, Mode=OneWay}" /></TextBlock>
+                    <Button Content="{loc:T SettingsOpenLogFolder}" Command="{Binding OpenLogFolderCommand}"
+                            Classes="secondary" HorizontalAlignment="Left" Margin="0,4,0,0" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

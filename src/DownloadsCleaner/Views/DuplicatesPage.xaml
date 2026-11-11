@@ -1,0 +1,158 @@
+<UserControl x:Class="DownloadsCleaner.Views.DuplicatesPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             xmlns:m="clr-namespace:DownloadsCleaner.Animations"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels">
+    <UserControl.Resources>
+        <Style x:Key="GroupItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="28,6,28,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <TextBlock Text="{loc:T NavDuplicates}" Style="{StaticResource TextTitle}"/>
+            <TextBlock Text="{Binding Summary}" Style="{StaticResource TextSecondary}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,14">
+            <Button Style="{StaticResource PrimaryButton}" Command="{Binding FindCommand}" Height="38" Padding="18,0"
+                    IsEnabled="{Binding IsSearching, Converter={StaticResource InverseBool}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE721;" Style="{StaticResource IconText}" FontSize="14" Foreground="White"/>
+                    <TextBlock Text="{loc:T DupFind}" Margin="9,0,0,0"/>
+                </StackPanel>
+            </Button>
+            <ComboBox Style="{StaticResource ModernComboBox}" Margin="12,0,0,0" Height="38" MinWidth="260"
+                      ItemsSource="{Binding StrategyOptions}" ItemTemplate="{StaticResource OptionItemTemplate}"
+                      SelectedValue="{Binding Strategy}" SelectedValuePath="Value"
+                      Visibility="{Binding HasResults, Converter={StaticResource BoolToVis}}"/>
+            <Button Style="{StaticResource SecondaryButton}" Content="{loc:T DupApplySelection}" Command="{Binding AutoSelectCommand}"
+                    Height="38" Margin="8,0,0,0" Visibility="{Binding HasResults, Converter={StaticResource BoolToVis}}"/>
+            <Button Style="{StaticResource GhostButton}" Content="{loc:T DupClearMarks}" Command="{Binding ClearMarksCommand}"
+                    Height="38" Margin="4,0,0,0" Visibility="{Binding HasResults, Converter={StaticResource BoolToVis}}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <ListBox Style="{StaticResource PlainListBox}" ItemsSource="{Binding Groups}" ItemContainerStyle="{StaticResource GroupItemStyle}"
+                     VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                     ScrollViewer.CanContentScroll="True" Margin="0,0,0,80"
+                     Visibility="{Binding HasResults, Converter={StaticResource BoolToVis}}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:DuplicateGroupViewModel}">
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,10" Padding="16,14">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource AccentBlueSoftBrush}">
+                                            <TextBlock Text="&#xE8C8;" Style="{StaticResource IconText}" Foreground="{DynamicResource AccentBlueBrush}"/>
+                                        </Border>
+                                        <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" Style="{StaticResource TextBody}" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" MaxWidth="520"/>
+                                            <TextBlock Style="{StaticResource TextCaption}" Margin="0,2,0,0">
+                                                <Run Text="{Binding CopiesText, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding SizeText, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Style="{StaticResource Badge}" Background="{DynamicResource SuccessSoftBrush}" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding WastedText}" Foreground="{DynamicResource SuccessBrush}" FontSize="12" FontWeight="SemiBold"/>
+                                    </Border>
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Files}" Margin="0,10,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:DuplicateFileViewModel}">
+                                            <Grid Height="46" Background="Transparent" ToolTip="{Binding FullPath}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="36"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="140"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.ColumnSpan="5" CornerRadius="8" Background="{DynamicResource HoverOverlayBrush}" Opacity="0"
+                                                        m:Motion.State="Hover" IsHitTestVisible="False"/>
+                                                <CheckBox Style="{StaticResource ModernCheckBox}" HorizontalAlignment="Center"
+                                                          IsChecked="{Binding IsMarked, Mode=TwoWay}" ToolTip="{loc:T DupSendOne}"/>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="4,0,8,0">
+                                                    <TextBlock Text="{Binding FullPath}" Style="{StaticResource TextBody}" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                                <Border Grid.Column="2" Style="{StaticResource Badge}" Background="{DynamicResource SuccessSoftBrush}"
+                                                        VerticalAlignment="Center" Margin="0,0,10,0"
+                                                        Visibility="{Binding IsKept, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Text="{loc:T DupKeep}" Foreground="{DynamicResource SuccessBrush}" FontSize="11" FontWeight="SemiBold"/>
+                                                </Border>
+                                                <TextBlock Grid.Column="3" Text="{Binding CreatedText}" Style="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                                                    <Button Style="{StaticResource IconButton}" Content="&#xE8E5;" ToolTip="{loc:T FilesOpenFile}"
+                                                            Command="{Binding DataContext.OpenFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"/>
+                                                    <Button Style="{StaticResource IconButton}" Content="&#xE838;" ToolTip="{loc:T CommonShowInExplorer}"
+                                                            Command="{Binding DataContext.OpenLocationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-60,0,0"
+                        Visibility="{Binding HasResults, Converter={StaticResource BoolToVis}, ConverterParameter=invert}"
+                        m:Motion.Entrance="FadeUp" m:Motion.EntranceRepeat="True">
+                <Border Width="76" Height="76" CornerRadius="22" Background="{DynamicResource AccentSoftBrush}" HorizontalAlignment="Center">
+                    <TextBlock Text="&#xE8C8;" Style="{StaticResource IconText}" FontSize="32" Foreground="{DynamicResource AccentBrush}"/>
+                </Border>
+                <TextBlock Text="{loc:T DupExactTitle}" Style="{StaticResource TextHeading}" Margin="0,16,0,6" HorizontalAlignment="Center"/>
+                <TextBlock Style="{StaticResource TextSecondary}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420"
+                           Text="{loc:T DupExactHint}"/>
+            </StackPanel>
+
+            <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="0,0,0,14" Padding="16,10" CornerRadius="14"
+                    Background="{DynamicResource BgElevatedBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+                    m:Motion.Entrance="FadeUp" m:Motion.EntranceRepeat="True">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding MarkedCount}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.4" Color="{DynamicResource ShadowColor}"/>
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource TextBody}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,18,0">
+                        <Run Text="{loc:T DupMarkedPrefix}"/><Run Text="{Binding MarkedCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding MarkedBytesText, Mode=OneWay}"/>
+                    </TextBlock>
+                    <Button Style="{StaticResource DangerButton}" Content="{loc:T DupDeleteMarked}" Command="{Binding DeleteMarkedCommand}" Padding="16,8"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

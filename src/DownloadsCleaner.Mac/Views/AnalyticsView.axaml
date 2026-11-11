@@ -1,0 +1,105 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:ctl="clr-namespace:DownloadsCleaner.Mac.Controls"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.AnalyticsView">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,4,24,24" Spacing="16">
+
+            <StackPanel>
+                <TextBlock Text="{loc:T AnalyticsTitle}" Classes="title" />
+                <TextBlock Text="{loc:T AnalyticsSubtitle}" Classes="caption" Margin="0,4,0,0" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border Classes="card" IsVisible="{Binding HasData, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                <StackPanel HorizontalAlignment="Center" Spacing="6">
+                    <TextBlock Text="◔" FontSize="32" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="{loc:T AnalyticsEmptyTitle}" Classes="heading" HorizontalAlignment="Center" Margin="0,8,0,0" />
+                    <TextBlock Text="{loc:T AnalyticsEmptyHint}" Classes="caption" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <Grid ColumnDefinitions="*,*" IsVisible="{Binding HasData, Converter={StaticResource BoolToVis}}">
+                <!-- По категориям -->
+                <Border Grid.Column="0" Classes="card" Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T AnalyticsByCategory}" Classes="heading" />
+                        <Grid Height="220" Margin="0,10">
+                            <ctl:DonutChart Segments="{Binding Segments}" Thickness="24" />
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ctl:AnimatedNumber Value="{Binding TotalBytes}" Format="Bytes" FontSize="22" FontWeight="SemiBold"
+                                                    HorizontalAlignment="Center" />
+                                <TextBlock Text="{loc:T AnalyticsTotalInFolder}" Classes="caption" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding Legend}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="vm:LegendRow">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4">
+                                        <Ellipse Width="9" Height="9" Fill="{Binding Category, Converter={StaticResource CategoryBrush}}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Title}" Margin="8,0" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding PercentText}" Classes="caption" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- По возрасту и диску -->
+                <StackPanel Grid.Column="1" Spacing="14">
+                    <Border Classes="card">
+                        <StackPanel>
+                            <TextBlock Text="{loc:T AnalyticsByAge}" Classes="heading" />
+                            <TextBlock Text="{loc:T AnalyticsAgeHint}" Classes="caption" Margin="0,3,0,8" TextWrapping="Wrap" />
+                            <ItemsControl ItemsSource="{Binding AgeRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="vm:AgeRow">
+                                        <Grid ColumnDefinitions="130,*,90" Margin="0,5">
+                                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                                            <ProgressBar Grid.Column="1" Value="{Binding Share}" Maximum="1" Height="7" Margin="8,0" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{Binding BytesText}" Classes="caption" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card">
+                        <StackPanel>
+                            <TextBlock Text="{Binding DiskTitle}" Classes="heading" />
+                            <TextBlock Text="{Binding DiskDetail}" Classes="caption" Margin="0,4,0,10" TextWrapping="Wrap" />
+                            <ProgressBar Value="{Binding DiskFraction}" Maximum="1" Height="9" />
+                            <TextBlock Classes="caption" Margin="0,8,0,0" TextWrapping="Wrap">
+                                <Run Text="{loc:T AnalyticsFolderPrefix}" /><Run Text="{Binding FolderShare, StringFormat=P1, Mode=OneWay}" /><Run Text="{loc:T AnalyticsFolderSuffix}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Самые крупные файлы -->
+            <Border Classes="card" IsVisible="{Binding HasData, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="{loc:T AnalyticsBiggest}" Classes="heading" Margin="0,0,0,8" />
+                    <ItemsControl ItemsSource="{Binding Biggest}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:BigFileRow">
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Folder}" Classes="caption" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding SizeText}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

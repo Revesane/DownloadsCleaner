@@ -1,0 +1,122 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+        xmlns:svc="clr-namespace:DownloadsCleaner.Services"
+        xmlns:views="clr-namespace:DownloadsCleaner.Mac.Views"
+        xmlns:conv="clr-namespace:DownloadsCleaner.Mac.Converters"
+        xmlns:ctl="clr-namespace:DownloadsCleaner.Mac.Controls"
+        xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+        x:Class="DownloadsCleaner.Mac.Views.MainWindow"
+        Title="Downloads Cleaner"
+        Width="1180" Height="760" MinWidth="1040" MinHeight="640"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============ Боковая панель ============ -->
+        <Border Grid.Column="0" Width="240" Classes="sidebar">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <StackPanel Orientation="Horizontal" Margin="20,20,20,18" Spacing="10">
+                    <Border Width="30" Height="30" CornerRadius="9" Background="{DynamicResource AccentBrush}">
+                        <TextBlock Text="↓" Foreground="White" FontSize="16" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Downloads" FontWeight="SemiBold" FontSize="14" />
+                        <TextBlock Text="Cleaner" Classes="caption" />
+                    </StackPanel>
+                </StackPanel>
+
+                <ListBox Grid.Row="1" ItemsSource="{Binding NavItems}" SelectedItem="{Binding SelectedNav, Mode=TwoWay}"
+                         Margin="10,4" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="vm:NavItemViewModel">
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Border Grid.Row="2" Margin="14,0,14,16" Padding="12,10" CornerRadius="12"
+                        Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="{Binding DiskTitle}" Classes="caption" />
+                        <TextBlock Text="{Binding DiskDetail}" FontWeight="SemiBold" Margin="0,2,0,6" TextTrimming="CharacterEllipsis" />
+                        <ProgressBar Value="{Binding DiskFraction}" Maximum="1" Height="5" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ============ Основная область ============ -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Шапка -->
+            <Grid Margin="24,16,20,10" ColumnDefinitions="*,Auto,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Border CornerRadius="14" Padding="12,6" Background="{Binding Status.DisplayState, Converter={StaticResource StateBrush}, ConverterParameter=soft}">
+                        <TextBlock Text="{Binding Status.DisplayTitle}" FontWeight="SemiBold" />
+                    </Border>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="{loc:T HomeScan}" Command="{Binding ScanCommand}"
+                        Classes="secondary" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <Button Grid.Column="2" Content="{loc:T MainSort}" Command="{Binding SortAllCommand}"
+                        Classes="primary" VerticalAlignment="Center" />
+            </Grid>
+
+            <!-- Текущая страница -->
+            <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch" />
+
+            <!-- Полоса операции -->
+            <Border Grid.Row="1" VerticalAlignment="Top" Margin="24,0,20,0" IsVisible="{Binding Status.IsBusy}"
+                    Background="{DynamicResource BgElevatedBrush}" CornerRadius="12" Padding="14,10"
+                    BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1">
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{Binding Status.Title}" FontWeight="SemiBold" />
+                        <Button Grid.Column="1" Content="{loc:T CommonCancel}" Command="{Binding Status.CancelCommand}"
+                                Classes="ghost" />
+                    </Grid>
+                    <ProgressBar Value="{Binding Status.Progress}" Maximum="1" />
+                    <TextBlock Text="{Binding Status.Detail}" Classes="caption" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ============ Уведомления ============ -->
+        <ItemsControl ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                      Width="360" Margin="0,0,20,20">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="svc:ToastViewModel">
+                    <Border Margin="0,0,0,8" CornerRadius="12" Padding="14,12"
+                            Background="{DynamicResource BgElevatedBrush}"
+                            BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding Message}" Classes="caption" TextWrapping="Wrap"
+                                       IsVisible="{Binding HasMessage, Converter={StaticResource BoolToVis}}" />
+                            <Button Content="{Binding ActionText}" Command="{Binding RunActionCommand}"
+                                    Classes="ghost" HorizontalAlignment="Left" Padding="0,4"
+                                    IsVisible="{Binding HasAction, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- ============ Диалоги ============ -->
+        <Grid IsVisible="{Binding Dialogs.Current, Converter={StaticResource NullToVis}}">
+            <Border Background="{DynamicResource ScrimBrush}" />
+            <ContentControl Content="{Binding Dialogs.Current}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+</Window>

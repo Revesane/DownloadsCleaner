@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:models="clr-namespace:DownloadsCleaner.Models"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.SortPreviewDialogView">
+
+    <Border Classes="card" Width="720" Padding="24">
+        <StackPanel Spacing="14">
+            <StackPanel>
+                <TextBlock Text="{loc:T DialogSortTitle}" Classes="heading" FontSize="18" />
+                <TextBlock Text="{Binding Summary}" Classes="caption" Margin="0,2,0,0" />
+            </StackPanel>
+
+            <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding IsBuilding, Converter={StaticResource BoolToVis}}" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Border Background="{DynamicResource BgInputBrush}" CornerRadius="9" Padding="12,8">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T DialogDestination}" Classes="caption" />
+                        <TextBlock Text="{Binding Destination}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+                <Button Grid.Column="1" Content="{loc:T CommonChange}" Command="{Binding ChangeDestinationCommand}" Classes="secondary" Margin="8,0,0,0" />
+            </Grid>
+
+            <CheckBox Content="{loc:T DialogIncludeSubfolders}" IsChecked="{Binding IncludeSubfolders, Mode=TwoWay}"
+                      IsVisible="{Binding CanChangeScope, Converter={StaticResource BoolToVis}}" />
+
+            <ItemsControl ItemsSource="{Binding CategoryLines}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="8" Padding="10,4" Margin="0,0,8,6" Background="{DynamicResource BgInputBrush}">
+                            <TextBlock Text="{Binding}" FontSize="12" />
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border Background="{DynamicResource BgInputBrush}" CornerRadius="12" Padding="6" Height="240">
+                <ListBox ItemsSource="{Binding Rows}" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="vm:SortPreviewRow">
+                            <Grid ColumnDefinitions="*,110,80" Margin="8,4">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Target}" Classes="caption" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="{Binding Category}" Classes="caption" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="{Binding Size}" Classes="caption" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <TextBlock Text="{Binding Notes}" Classes="caption" TextWrapping="Wrap" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="{loc:T CommonCancel}" Command="{Binding CancelCommand}" Classes="ghost" />
+                <Button Content="{loc:T DialogMoveFiles}" Command="{Binding ConfirmCommand}" Classes="primary" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

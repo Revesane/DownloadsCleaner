@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:ctl="clr-namespace:DownloadsCleaner.Mac.Controls"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.HistoryView">
+
+    <Grid Margin="24,4,24,24" RowDefinitions="Auto,Auto,*">
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="{loc:T HistoryTitle}" Classes="title" />
+            <TextBlock Text="{loc:T HistorySubtitle}" Classes="caption" Margin="0,4,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+            <Button Content="{loc:T HistoryOpenBin}" Command="{Binding OpenRecycleBinCommand}" Classes="primary" />
+            <Button Content="{loc:T HistoryClear}" Command="{Binding ClearCommand}" Classes="ghost" />
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <ListBox ItemsSource="{Binding Items}" Background="Transparent" BorderThickness="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="vm:HistoryItemViewModel">
+                        <Border Classes="card" Margin="0,0,0,8" Padding="14,10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Classes="caption" TextTrimming="CharacterEllipsis">
+                                        <Run Text="{Binding TimeText, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Details, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="{loc:T CommonUndo}" Command="{Binding DataContext.UndoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" Classes="secondary" VerticalAlignment="Center"
+                                        IsVisible="{Binding CanUndo, Converter={StaticResource BoolToVis}}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                        IsVisible="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="◷" FontSize="34" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                <TextBlock Text="{loc:T HistoryEmptyTitle}" Classes="heading" HorizontalAlignment="Center" Margin="0,10,0,4" />
+                <TextBlock Text="{loc:T HistoryEmptyHint}" Classes="caption" HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

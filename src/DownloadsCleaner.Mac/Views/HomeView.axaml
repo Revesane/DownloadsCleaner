@@ -1,0 +1,164 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:ctl="clr-namespace:DownloadsCleaner.Mac.Controls"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.HomeView">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,4,24,24" Spacing="18">
+
+            <!-- Заголовок -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="{loc:T HomeTitle}" Classes="title" />
+                    <TextBlock Text="{Binding FolderPath}" Classes="caption" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="{loc:T HomeScanAgain}" Command="{Binding ScanCommand}" Classes="primary" />
+            </Grid>
+
+            <!-- Подсказка до первого сканирования -->
+            <Border Classes="card" IsVisible="{Binding HasScanned, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <TextBlock Text="↓" FontSize="22" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Margin="14,0" VerticalAlignment="Center">
+                        <TextBlock Text="{loc:T HomeNotScannedTitle}" Classes="heading" />
+                        <TextBlock Text="{loc:T HomeNotScannedText}" Classes="caption" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="2" Content="{loc:T HomeScan}" Command="{Binding ScanCommand}" Classes="primary" />
+                </Grid>
+            </Border>
+
+            <!-- Итог сканирования -->
+            <Border Classes="card" IsVisible="{Binding HasScanned, Converter={StaticResource BoolToVis}}">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Border Width="56" Height="56" CornerRadius="16" Background="{DynamicResource AccentBrush}">
+                        <TextBlock Text="↓" Foreground="White" FontSize="26" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{loc:T HomeFoundPrefix}" FontSize="22" FontWeight="SemiBold" />
+                            <ctl:AnimatedNumber Value="{Binding TotalBytes}" Format="Bytes" FontSize="22" FontWeight="SemiBold"
+                                                Foreground="{DynamicResource AccentBrush}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
+                            <TextBlock Text="{loc:T HomeCanFreePrefix}" Classes="caption" />
+                            <ctl:AnimatedNumber Value="{Binding FreeableBytes}" Format="Bytes" FontSize="12" FontWeight="SemiBold"
+                                                Foreground="{DynamicResource SuccessBrush}" />
+                            <TextBlock Text="{loc:T HomeTempAndCopies}" Classes="caption" FontSize="11" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Content="{loc:T HomeAnalytics}" Command="{Binding ShowAnalyticsCommand}" Classes="secondary" />
+                        <Button Content="{loc:T HomeFreeSpace}" Command="{Binding ShowLargeCommand}" Classes="primary" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Сводка -->
+            <UniformGrid Columns="3">
+                <Button Classes="card" Command="{Binding ShowAllCommand}" Margin="0,0,10,10" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeTotalFiles}" Classes="caption" />
+                        <ctl:AnimatedNumber Value="{Binding TotalFiles}" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock Text="{loc:T HomeTotalFilesHint}" Classes="caption" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="card" Command="{Binding ShowAllCommand}" Margin="0,0,10,10" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeFolderSize}" Classes="caption" />
+                        <ctl:AnimatedNumber Value="{Binding TotalBytes}" Format="Bytes" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock Text="{loc:T HomeFolderSizeHint}" Classes="caption" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="card" Command="{Binding SortCommand}" Margin="0,0,0,10" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeSortable}" Classes="caption" />
+                        <ctl:AnimatedNumber Value="{Binding SortableCount}" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock Text="{loc:T HomeSortableHint}" Classes="caption" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="card" Command="{Binding ShowOldCommand}" Margin="0,0,10,10" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeOldFiles}" Classes="caption" />
+                        <ctl:AnimatedNumber Value="{Binding OldCount}" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock Text="{Binding OldCaption}" Classes="caption" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="card" Command="{Binding ShowDuplicatesCommand}" Margin="0,0,10,10" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeDuplicates}" Classes="caption" />
+                        <ctl:AnimatedNumber Value="{Binding DuplicateCopies}" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock Text="{loc:T HomeExtraCopies}" Classes="caption" IsVisible="{Binding DuplicatesKnown, Converter={StaticResource BoolToVis}}" />
+                        <TextBlock Text="{loc:T HomeDupNotSearched}" Classes="caption"
+                                   IsVisible="{Binding DuplicatesKnown, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="card" Command="{Binding ShowTemporaryCommand}" Margin="0,0,0,10" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeCanFreeLower}" Classes="caption" />
+                        <ctl:AnimatedNumber Value="{Binding FreeableBytes}" Format="Bytes" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock Text="{loc:T HomeCanFreeHint}" Classes="caption" />
+                    </StackPanel>
+                </Button>
+            </UniformGrid>
+
+            <!-- Категории -->
+            <TextBlock Text="{loc:T HomeCategories}" Classes="heading" />
+            <ItemsControl ItemsSource="{Binding Categories}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel ItemWidth="240" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:CategoryCardViewModel">
+                        <Button Classes="card" Margin="0,0,10,10" Padding="16"
+                                Command="{Binding DataContext.OpenCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}" HorizontalContentAlignment="Stretch">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,10,0,0">
+                                    <ctl:AnimatedNumber Value="{Binding Count}" FontSize="20" FontWeight="SemiBold" />
+                                    <TextBlock Text="{loc:T HomeFilesSuffix}" Classes="caption" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                                <ctl:AnimatedNumber Value="{Binding Bytes}" Format="Bytes" FontSize="11" Classes="caption" Margin="0,2,0,8" />
+                                <ProgressBar Value="{Binding Share}" Maximum="1" Height="4" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Быстрые действия -->
+            <TextBlock Text="{loc:T HomeQuickActions}" Classes="heading" />
+            <UniformGrid Columns="4">
+                <Button Classes="card" Command="{Binding SortCommand}" Margin="0,0,10,0" Padding="14" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeSortByFolders}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:T HomeSortPreviewHint}" Classes="caption" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="card" Command="{Binding ShowLargeCommand}" Margin="0,0,10,0" Padding="14" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeLargeFiles}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:T HomeLargeHint}" Classes="caption" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="card" Command="{Binding ShowTemporaryCommand}" Margin="0,0,10,0" Padding="14" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeTempFiles}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:T HomeTempHint}" Classes="caption" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="card" Command="{Binding ShowDuplicatesCommand}" Margin="0,0,0,0" Padding="14" HorizontalContentAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T HomeDupSearch}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:T HomeDupHint}" Classes="caption" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Button>
+            </UniformGrid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

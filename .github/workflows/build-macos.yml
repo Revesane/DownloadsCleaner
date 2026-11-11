@@ -1,0 +1,69 @@
+name: build-macos
+
+# Сборка версии для macOS (.app) на runner'е GitHub Actions.
+# Артефакты: Downloads Cleaner.app для Apple Silicon и Intel.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: macOS ${{ matrix.rid }}
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [ osx-arm64, osx-x64 ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Тесты (общая логика)
+        run: dotnet test tests/DownloadsCleaner.Tests/DownloadsCleaner.Tests.csproj -c Release --nologo
+
+      - name: Сборка приложения
+        run: ./build-mac.sh ${{ matrix.rid }}
+
+      - name: Загрузить .app
+        uses: actions/upload-artifact@v4
+        with:
+          name: DownloadsCleaner-${{ matrix.rid }}
+          path: publish/macos/${{ matrix.rid }}/*.app
+          if-no-files-found: error
+
+  package:
+    name: Готовый архив (universal)
+    needs: build
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Собрать оба варианта
+        run: |
+          ./build-mac.sh osx-arm64
+          ./build-mac.sh osx-x64
+
+      - name: Собрать .zip
+        run: |
+          cd publish/macos
+          zip -r DownloadsCleaner-macOS.zip osx-arm64/*.app osx-x64/*.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DownloadsCleaner-macOS
+          path: publish/macos/DownloadsCleaner-macOS.zip
+          if-no-files-found: error

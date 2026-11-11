@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:models="clr-namespace:DownloadsCleaner.Models"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.ConfirmDialogView">
+
+    <Border Classes="card" Width="480" Padding="24">
+        <StackPanel Spacing="16">
+            <TextBlock Text="{Binding Title}" Classes="heading" FontSize="18" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Message}" Classes="caption" TextWrapping="Wrap" LineHeight="20" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="{Binding CancelText}" Command="{Binding CancelCommand}" Classes="ghost" />
+                <Button Content="{Binding ConfirmText}" Command="{Binding ConfirmCommand}" Classes="primary" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

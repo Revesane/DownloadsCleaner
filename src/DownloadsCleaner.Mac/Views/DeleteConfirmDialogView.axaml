@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
+             xmlns:models="clr-namespace:DownloadsCleaner.Models"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             x:Class="DownloadsCleaner.Mac.Views.DeleteConfirmDialogView">
+
+    <Border Classes="card" Width="600" Padding="24">
+        <StackPanel Spacing="14">
+            <StackPanel>
+                <TextBlock Text="{Binding Title}" Classes="heading" FontSize="18" />
+                <TextBlock Text="{Binding Summary}" Classes="caption" Margin="0,2,0,0" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding Hint}" Classes="caption" TextWrapping="Wrap" />
+
+            <Border Background="{DynamicResource BgInputBrush}" CornerRadius="12" Padding="6" MaxHeight="220">
+                <ListBox ItemsSource="{Binding Files}" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="models:FileEntry">
+                            <Grid ColumnDefinitions="*,Auto" Margin="8,4">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Directory}" Classes="caption" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="{Binding Size, Converter={StaticResource Bytes}}" Classes="caption" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <CheckBox Content="{loc:T DialogDeletePermanent}" IsChecked="{Binding UsePermanent, Mode=TwoWay}"
+                      IsVisible="{Binding PermanentAllowed, Converter={StaticResource BoolToVis}}" />
+
+            <CheckBox Content="{loc:T DialogDeletePermanentConfirm}" IsChecked="{Binding Acknowledged, Mode=TwoWay}"
+                      IsVisible="{Binding NeedsAcknowledge, Converter={StaticResource BoolToVis}}" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="{loc:T CommonCancel}" Command="{Binding CancelCommand}" Classes="ghost" />
+                <Button Content="{Binding ConfirmText}" Command="{Binding ConfirmCommand}" Classes="danger" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>
