@@ -1,0 +1,5 @@
+# Скрипты для macOS и файлы CI должны сохранять LF, иначе bash и GitHub Actions
+# не будут их читать (в Windows репозиторий копируется с CRLF).
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
