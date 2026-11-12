@@ -13,6 +13,14 @@ on:
         description: 'Тег выпуска, к которому добавить .dmg (пусто - только артефакты)'
         required: false
         default: ''
+      runner:
+        description: 'Машина GitHub (если на одной долгая очередь - попробуйте другую)'
+        required: false
+        type: choice
+        default: macos-latest
+        options:
+          - macos-latest
+          - macos-15-intel
 
 permissions:
   contents: write
@@ -20,8 +28,9 @@ permissions:
 jobs:
   build:
     name: macOS ${{ matrix.rid }}
-    # macos-14 больше не выдаётся («configuration is not supported»); osx-x64 собирается и на ARM-машине.
-    runs-on: macos-latest
+    # macos-14 больше не выдаётся («configuration is not supported»). Оба варианта (.dmg для
+    # Apple Silicon и Intel) собираются на любой машине - .NET умеет собирать под другую архитектуру.
+    runs-on: ${{ inputs.runner || 'macos-latest' }}
     strategy:
       fail-fast: false
       matrix:
