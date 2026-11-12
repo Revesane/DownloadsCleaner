@@ -21,6 +21,11 @@ public interface IFileWatcherService : IDisposable
     event EventHandler<string>? FileReady;
     /// <summary>Файл удалён или переименован (старый путь).</summary>
     event EventHandler<string>? FileRemoved;
+    /// <summary>
+    /// Часть уведомлений потеряна (например, переполнился буфер при распаковке архива),
+    /// слежение уже перезапущено. Список файлов нужно сверить с диском.
+    /// </summary>
+    event EventHandler? EventsLost;
     bool IsRunning { get; }
     void Start(string root, WatcherOptions? options = null);
     void Stop();
@@ -49,6 +54,7 @@ public sealed class FileWatcherService : IFileWatcherService
 
     public event EventHandler<string>? FileReady;
     public event EventHandler<string>? FileRemoved;
+    public event EventHandler? EventsLost;
     public bool IsRunning => _watcher != null;
 
     public FileWatcherService(IFileTypeDetectionService detector, ILogService? log = null)
@@ -76,15 +82,21 @@ public sealed class FileWatcherService : IFileWatcherService
             w.Created += (_, e) => OnCreated(e.FullPath);
             w.Renamed += (_, e) => { OnDeleted(e.OldFullPath); OnCreated(e.FullPath); };
             w.Deleted += (_, e) => OnDeleted(e.FullPath);
-            w.Error += (_, e) =>
-            {
-                _log.Warn($"Ошибка FileSystemWatcher: {e.GetException().Message}. Перезапуск.");
-                RequestRestart();
-            };
+            w.Error += (_, e) => OnWatcherError(e.GetException());
             w.EnableRaisingEvents = true;
             _watcher = w;
             _log.Info($"Отслеживание запущено: {root}");
         }
+    }
+
+    /// <summary>
+    /// Ошибка FileSystemWatcher (чаще всего - переполнение внутреннего буфера, когда за раз
+    /// появляется много файлов). События за этот промежуток потеряны безвозвратно.
+    /// </summary>
+    internal void OnWatcherError(Exception? ex)
+    {
+        _log.Warn($"Ошибка FileSystemWatcher: {ex?.Message}. Перезапуск.");
+        RequestRestart();
     }
 
     /// <summary>
@@ -106,6 +118,8 @@ public sealed class FileWatcherService : IFileWatcherService
                 // настройками). Тогда старый запрос на перезапуск уже неактуален.
                 if (Volatile.Read(ref _generation) != generation) return;
                 Start(root, options);
+                // Пропущенные уведомления не вернуть: просим владельца сверить список с диском.
+                if (IsRunning) EventsLost?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {

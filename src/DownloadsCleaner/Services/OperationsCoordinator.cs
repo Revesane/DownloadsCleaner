@@ -66,7 +66,11 @@ public sealed class OperationsCoordinator : IOperationsCoordinator
 
         _watcher.FileReady += (_, path) => UiThread.Post(() => OnFileReady(path));
         _watcher.FileRemoved += (_, path) => UiThread.Post(() => OnFileRemoved(path));
+        _watcher.EventsLost += (_, _) => UiThread.Post(() => _ = ResyncAsync());
     }
+
+    private bool _resyncRunning;
+    private bool _resyncAgain;
 
     private AppSettings S => _settings.Current;
 
@@ -410,6 +414,65 @@ public sealed class OperationsCoordinator : IOperationsCoordinator
         {
             _log.Error("Не удалось запустить отслеживание папки", ex);
         }
+    }
+
+    /// <summary>
+    /// Тихо сверяет библиотеку с диском после потери уведомлений наблюдателя: добавляет новые
+    /// и изменившиеся файлы, убирает исчезнувшие. В отличие от <see cref="ScanAsync"/> не сбрасывает
+    /// результаты поиска дубликатов и выделение и не показывает баннер. Автосортировка к таким
+    /// файлам не применяется: пачка файлов из распакованного архива не должна разъехаться по папкам.
+    /// </summary>
+    internal async Task ResyncAsync()
+    {
+        if (_resyncRunning) { _resyncAgain = true; return; }
+        _resyncRunning = true;
+        try
+        {
+            do
+            {
+                _resyncAgain = false;
+                // Своя операция программы сама меняет файлы - сверяемся после её окончания.
+                while (_status.IsBusy) await Task.Delay(1000);
+                if (!_library.HasScanned) return;      // первое сканирование ещё не выполнено
+                await ResyncOnceAsync();
+            } while (_resyncAgain);
+        }
+        finally { _resyncRunning = false; }
+    }
+
+    private async Task ResyncOnceAsync()
+    {
+        var root = S.DownloadsPath;
+        if (!Directory.Exists(root)) return;
+
+        ScanResult result;
+        try
+        {
+            var options = new ScanOptions(S.IncludeSubfolders, S.ExcludedFolders.ToList(), S.ExcludedExtensions.ToList());
+            result = await _scanner.ScanAsync(root, options, null, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _log.Warn($"Сверка списка с диском не удалась: {ex.Message}");
+            return;
+        }
+
+        // Папку сменили - её пересканирует обработчик настроек. Началась операция - повторим после неё.
+        if (!PathHelper.AreSame(root, S.DownloadsPath)) return;
+        if (_status.IsBusy) { _resyncAgain = true; return; }
+
+        var known = _library.Files.ToDictionary(f => f.FullPath, StringComparer.OrdinalIgnoreCase);
+        var found = new HashSet<string>(result.Files.Select(f => f.FullPath), StringComparer.OrdinalIgnoreCase);
+        // Каждое изменение перепроверяем на диске: пока шло сканирование, файл мог появиться или исчезнуть.
+        var gone = known.Keys.Where(p => !found.Contains(p) && !File.Exists(p)).ToList();
+        var changed = result.Files
+            .Where(f => (!known.TryGetValue(f.FullPath, out var k) || k.Size != f.Size || k.Modified != f.Modified)
+                        && File.Exists(f.FullPath))
+            .ToList();
+
+        if (gone.Count > 0) _library.Remove(gone);
+        if (changed.Count > 0) _library.AddOrUpdateMany(changed);
+        _log.Info($"Сверка с диском после потери уведомлений: добавлено/обновлено {changed.Count}, убрано {gone.Count}");
     }
 
     private void OnFileRemoved(string path)
