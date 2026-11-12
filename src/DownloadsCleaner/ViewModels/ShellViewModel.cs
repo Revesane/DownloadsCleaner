@@ -46,6 +46,7 @@ public sealed partial class ShellViewModel : ObservableObject
     private readonly HistoryViewModel _history;
     private readonly SettingsViewModel _settingsPage;
     private readonly AnalyticsViewModel _analytics;
+    private readonly SmartTipsViewModel? _tips;
     private FilePreset _pendingPreset;
     private string? _pendingSearch;
     private bool _syncingCategory;
@@ -54,8 +55,9 @@ public sealed partial class ShellViewModel : ObservableObject
     public ShellViewModel(ISettingsService settings, IFileLibrary library, IOperationsCoordinator operations,
         INavigationService navigation, IThemeService theme, HomeViewModel home, FileListViewModel files,
         DuplicatesViewModel duplicates, HistoryViewModel history, SettingsViewModel settingsPage, AnalyticsViewModel analytics,
-        AppStatus status, IToastService toasts, IDialogService dialogs, ILogService log)
+        AppStatus status, IToastService toasts, IDialogService dialogs, ILogService log, SmartTipsViewModel? tips = null)
     {
+        _tips = tips;
         _settings = settings;
         _library = library;
         _operations = operations;
@@ -88,6 +90,17 @@ public sealed partial class ShellViewModel : ObservableObject
             new(NavKind.History, "NavHistory", ""),
             new(NavKind.Settings, "NavSettings", "")
         };
+
+        // Умные советы есть только там, где зарегистрирован их сервис (Windows).
+        if (tips != null)
+        {
+            var analyticsItem = NavItems.First(n => n.Kind == NavKind.Analytics);
+            NavItems.Insert(NavItems.IndexOf(analyticsItem) + 1, new NavItemViewModel(NavKind.Tips, "NavTips", ""));
+            tips.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(SmartTipsViewModel.TipCount)) UpdateBadges();
+            };
+        }
 
         navigation.Requested += OnNavigationRequested;
         _library.Changed += (_, _) => { UpdateBadges(); UpdateDisk(); };
@@ -178,6 +191,7 @@ public sealed partial class ShellViewModel : ObservableObject
         {
             case NavKind.Home: CurrentPage = _home; break;
             case NavKind.Analytics: CurrentPage = _analytics; break;
+            case NavKind.Tips when _tips != null: CurrentPage = _tips; break;
             case NavKind.Duplicates: CurrentPage = _duplicates; break;
             case NavKind.History: CurrentPage = _history; break;
             case NavKind.Settings: CurrentPage = _settingsPage; break;
@@ -255,6 +269,7 @@ public sealed partial class ShellViewModel : ObservableObject
             {
                 NavKind.All => stats.TotalFiles,
                 NavKind.Duplicates => stats.DuplicateCopies,
+                NavKind.Tips => _tips?.TipCount ?? 0,
                 _ => CategoryOf(item.Kind) is { } c ? stats.Categories.First(x => x.Category == c).Count : 0
             };
         }

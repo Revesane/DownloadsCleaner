@@ -27,3 +27,8 @@ public partial class AnalyticsPage : UserControl
 {
     public AnalyticsPage() => InitializeComponent();
 }
+
+public partial class SmartTipsPage : UserControl
+{
+    public SmartTipsPage() => InitializeComponent();
+}

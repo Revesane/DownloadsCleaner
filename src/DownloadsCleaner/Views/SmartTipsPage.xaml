@@ -1,0 +1,147 @@
+<UserControl x:Class="DownloadsCleaner.Views.SmartTipsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
+             xmlns:m="clr-namespace:DownloadsCleaner.Animations"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels">
+    <UserControl.Resources>
+        <Style x:Key="GroupItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="28,6,28,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <TextBlock Text="{loc:T NavTips}" Style="{StaticResource TextTitle}"/>
+            <TextBlock Text="{Binding Summary}" Style="{StaticResource TextSecondary}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,14">
+            <Button Style="{StaticResource PrimaryButton}" Command="{Binding FindCommand}" Height="38" Padding="18,0"
+                    IsEnabled="{Binding IsSearching, Converter={StaticResource InverseBool}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE72C;" Style="{StaticResource IconText}" FontSize="14" Foreground="White"/>
+                    <TextBlock Text="{loc:T TipsFind}" Margin="9,0,0,0"/>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource SecondaryButton}" Content="{loc:T TipsMarkAll}" Command="{Binding MarkAllCommand}"
+                    Height="38" Margin="8,0,0,0" Visibility="{Binding HasTips, Converter={StaticResource BoolToVis}}"/>
+            <Button Style="{StaticResource GhostButton}" Content="{loc:T DupClearMarks}" Command="{Binding ClearMarksCommand}"
+                    Height="38" Margin="4,0,0,0" Visibility="{Binding HasTips, Converter={StaticResource BoolToVis}}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <ListBox Style="{StaticResource PlainListBox}" ItemsSource="{Binding Groups}" ItemContainerStyle="{StaticResource GroupItemStyle}"
+                     ScrollViewer.CanContentScroll="False" Margin="0,0,0,80"
+                     Visibility="{Binding HasTips, Converter={StaticResource BoolToVis}}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:SmartTipGroupViewModel}">
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,12" Padding="16,14">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Top">
+                                        <TextBlock Text="{Binding Glyph}" Style="{StaticResource IconText}" Foreground="{DynamicResource AccentBrush}"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="12,0,12,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" Style="{StaticResource TextBody}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Hint}" Style="{StaticResource TextCaption}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Style="{StaticResource Badge}" Background="{DynamicResource SuccessSoftBrush}" VerticalAlignment="Top">
+                                        <TextBlock Text="{Binding TotalText}" Foreground="{DynamicResource SuccessBrush}" FontSize="12" FontWeight="SemiBold"/>
+                                    </Border>
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Items}" Margin="0,10,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:SmartTipItemViewModel}">
+                                            <Grid Height="50" Background="Transparent" ToolTip="{Binding FullPath}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="36"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.ColumnSpan="4" CornerRadius="8" Background="{DynamicResource HoverOverlayBrush}" Opacity="0"
+                                                        m:Motion.State="Hover" IsHitTestVisible="False"/>
+                                                <CheckBox Style="{StaticResource ModernCheckBox}" HorizontalAlignment="Center"
+                                                          IsChecked="{Binding IsMarked, Mode=TwoWay}"/>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="4,0,8,0">
+                                                    <TextBlock Text="{Binding Name}" Style="{StaticResource TextBody}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Reason}" Style="{StaticResource TextCaption}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="2" Text="{Binding SizeText}" Style="{StaticResource TextBody}" TextAlignment="Right"
+                                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                                    <Button Style="{StaticResource IconButton}" Content="&#xE71B;" ToolTip="{loc:T TipsShowRelated}"
+                                                            Visibility="{Binding HasRelatedPath, Converter={StaticResource BoolToVis}}"
+                                                            Command="{Binding DataContext.OpenRelatedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"/>
+                                                    <Button Style="{StaticResource IconButton}" Content="&#xE838;" ToolTip="{loc:T CommonShowInExplorer}"
+                                                            Command="{Binding DataContext.OpenLocationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Пустое состояние: до анализа или когда советов нет -->
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-60,0,0"
+                        Visibility="{Binding HasTips, Converter={StaticResource BoolToVis}, ConverterParameter=invert}"
+                        m:Motion.Entrance="FadeUp" m:Motion.EntranceRepeat="True">
+                <Border Width="76" Height="76" CornerRadius="22" Background="{DynamicResource AccentSoftBrush}" HorizontalAlignment="Center">
+                    <TextBlock Text="&#xE82F;" Style="{StaticResource IconText}" FontSize="32" Foreground="{DynamicResource AccentBrush}"/>
+                </Border>
+                <TextBlock Text="{loc:T TipsEmptyTitle}" Style="{StaticResource TextHeading}" Margin="0,16,0,6" HorizontalAlignment="Center"/>
+                <TextBlock Style="{StaticResource TextSecondary}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="460"
+                           Text="{loc:T TipsEmptyHint}"/>
+            </StackPanel>
+
+            <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="0,0,0,14" Padding="16,10" CornerRadius="14"
+                    Background="{DynamicResource BgElevatedBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+                    m:Motion.Entrance="FadeUp" m:Motion.EntranceRepeat="True">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding MarkedCount}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.4" Color="{DynamicResource ShadowColor}"/>
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource TextBody}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,18,0">
+                        <Run Text="{loc:T TipsMarkedPrefix}"/><Run Text="{Binding MarkedCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding MarkedBytesText, Mode=OneWay}"/>
+                    </TextBlock>
+                    <Button Style="{StaticResource DangerButton}" Content="{loc:T TipsDeleteMarked}" Command="{Binding DeleteMarkedCommand}" Padding="16,8"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -100,6 +100,11 @@ public partial class App : Application
         s.AddSingleton<HistoryViewModel>();
         s.AddSingleton<AnalyticsViewModel>();
         s.AddSingleton<SettingsViewModel>();
+        s.AddSingleton<IArchiveLister, ZipArchiveLister>();
+        s.AddSingleton<IInstalledProgramsProvider, RegistryInstalledPrograms>();
+        s.AddSingleton<IInstallerInfoReader, FileVersionInstallerInfoReader>();
+        s.AddSingleton<ISmartTipsService, SmartTipsService>();
+        s.AddSingleton<SmartTipsViewModel>();
         s.AddSingleton<ShellViewModel>();
     }
 

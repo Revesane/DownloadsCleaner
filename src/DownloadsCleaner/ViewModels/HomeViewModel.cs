@@ -10,7 +10,7 @@ namespace DownloadsCleaner.ViewModels;
 
 public enum NavKind
 {
-    Home, All, Audio, Video, Images, Documents, Archives, Programs, Models3D, Other, Analytics, Duplicates, History, Settings
+    Home, All, Audio, Video, Images, Documents, Archives, Programs, Models3D, Other, Analytics, Duplicates, History, Settings, Tips
 }
 
 /// <param name="Search">Строка поиска для списка файлов (null - поиск не меняется).</param>
@@ -53,8 +53,9 @@ public sealed partial class HomeViewModel : ObservableObject
     private readonly INavigationService _navigation;
     private readonly AppStatus _status;
 
+    /// <param name="tips">Умные советы; null там, где их нет (версия для macOS).</param>
     public HomeViewModel(IFileLibrary library, ISettingsService settings, IOperationsCoordinator operations,
-        INavigationService navigation, AppStatus status)
+        INavigationService navigation, AppStatus status, SmartTipsViewModel? tips = null)
     {
         _library = library;
         _settings = settings;
@@ -62,6 +63,7 @@ public sealed partial class HomeViewModel : ObservableObject
         _navigation = navigation;
         _status = status;
         Status = status;
+        Tips = tips;
 
         foreach (var c in FileCategoryInfo.All) Categories.Add(new CategoryCardViewModel(c));
         _library.Changed += (_, _) => UpdateFromLibrary();
@@ -78,6 +80,7 @@ public sealed partial class HomeViewModel : ObservableObject
     }
 
     public AppStatus Status { get; }
+    public SmartTipsViewModel? Tips { get; }
     public ObservableCollection<CategoryCardViewModel> Categories { get; } = new();
 
     [ObservableProperty] private bool _hasScanned;
@@ -144,4 +147,5 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand] private void ShowDuplicates() => _navigation.Go(NavKind.Duplicates);
     [RelayCommand] private void ShowAnalytics() => _navigation.Go(NavKind.Analytics);
     [RelayCommand] private void ShowAll() => _navigation.Go(NavKind.All);
+    [RelayCommand] private void ShowTips() => _navigation.Go(NavKind.Tips);
 }

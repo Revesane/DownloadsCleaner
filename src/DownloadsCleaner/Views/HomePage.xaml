@@ -87,6 +87,36 @@
                 </Grid>
             </Border>
 
+            <!-- Умные советы: появляется, когда найдено, что можно удалить без потерь -->
+            <Button Style="{StaticResource CardButton}" Command="{Binding ShowTipsCommand}" Padding="20,16" Margin="0,0,0,16"
+                    HorizontalContentAlignment="Stretch"
+                    Visibility="{Binding Tips.HasTips, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"
+                    m:Motion.Entrance="FadeUp" m:Motion.EntranceDelay="40">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Width="44" Height="44" CornerRadius="14" Background="{DynamicResource SuccessSoftBrush}">
+                        <TextBlock Text="&#xE82F;" Style="{StaticResource IconText}" FontSize="20" Foreground="{DynamicResource SuccessBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{loc:T HomeTipsPrefix}" Style="{StaticResource TextBody}" FontWeight="SemiBold" FontSize="15"/>
+                            <ctl:AnimatedNumber Value="{Binding Tips.TotalBytes}" Format="Bytes" FontSize="15" FontWeight="SemiBold"
+                                                Foreground="{DynamicResource SuccessBrush}"/>
+                            <TextBlock Text="{loc:T HomeTipsSuffix}" Style="{StaticResource TextBody}" FontWeight="SemiBold" FontSize="15"/>
+                        </StackPanel>
+                        <TextBlock Text="{loc:T HomeTipsHint}" Style="{StaticResource TextCaption}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{loc:T HomeTipsOpen}" Style="{StaticResource TextBody}" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold"/>
+                        <TextBlock Text="&#xE76C;" Style="{StaticResource IconText}" FontSize="11" Foreground="{DynamicResource AccentBrush}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Button>
+
             <!-- Сводка -->
             <UniformGrid Columns="3" Margin="0,0,-12,0">
                 <Button Style="{StaticResource CardButton}" Command="{Binding ShowAllCommand}" Margin="0,0,12,12"

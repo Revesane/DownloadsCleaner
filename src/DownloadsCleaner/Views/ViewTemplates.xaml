@@ -9,4 +9,5 @@
     <DataTemplate DataType="{x:Type vm:HistoryViewModel}"><views:HistoryPage/></DataTemplate>
     <DataTemplate DataType="{x:Type vm:AnalyticsViewModel}"><views:AnalyticsPage/></DataTemplate>
     <DataTemplate DataType="{x:Type vm:SettingsViewModel}"><views:SettingsPage/></DataTemplate>
+    <DataTemplate DataType="{x:Type vm:SmartTipsViewModel}"><views:SmartTipsPage/></DataTemplate>
 </ResourceDictionary>

@@ -47,6 +47,7 @@
     <Compile Include="..\DownloadsCleaner\Services\OperationsCoordinator.cs" />
     <Compile Include="..\DownloadsCleaner\Services\RecycleBinQuota.cs" />
     <Compile Include="..\DownloadsCleaner\Services\SettingsService.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\SmartTips.cs" />
     <Compile Include="..\DownloadsCleaner\Services\ToastService.cs" />
     <Compile Include="..\DownloadsCleaner\ViewModels\AnalyticsViewModel.cs" />
     <Compile Include="..\DownloadsCleaner\ViewModels\DialogViewModels.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="..\DownloadsCleaner\ViewModels\HomeViewModel.cs" />
     <Compile Include="..\DownloadsCleaner\ViewModels\SettingsViewModel.cs" />
     <Compile Include="..\DownloadsCleaner\ViewModels\ShellViewModel.cs" />
+    <Compile Include="..\DownloadsCleaner\ViewModels\SmartTipsViewModel.cs" />
   </ItemGroup>
 
   <ItemGroup>

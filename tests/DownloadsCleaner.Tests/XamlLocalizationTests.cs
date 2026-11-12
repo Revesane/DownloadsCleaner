@@ -138,7 +138,8 @@ public sealed class XamlLocalizationTests
                 () => new Views.DuplicatesPage(),
                 () => new Views.HistoryPage(),
                 () => new Views.AnalyticsPage(),
-                () => new Views.SettingsPage()
+                () => new Views.SettingsPage(),
+                () => new Views.SmartTipsPage()
             };
 
             foreach (var factory in pages)
