@@ -15,15 +15,25 @@ public interface IFileScannerService
     FileEntry? TryCreateEntry(string path);
 }
 
+/// <summary>Определяет, откуда скачан файл (реализация зависит от платформы).</summary>
+public interface IDownloadSourceReader
+{
+    /// <summary>Источник загрузки или null, если он неизвестен. Не бросает исключений.</summary>
+    DownloadSource? TryRead(string path);
+}
+
 public sealed class FileScannerService : IFileScannerService
 {
     private readonly IFileTypeDetectionService _detector;
     private readonly ILogService _log;
+    private readonly IDownloadSourceReader? _sources;
 
-    public FileScannerService(IFileTypeDetectionService detector, ILogService? log = null)
+    public FileScannerService(IFileTypeDetectionService detector, ILogService? log = null,
+        IDownloadSourceReader? sources = null)
     {
         _detector = detector;
         _log = log ?? NullLogService.Instance;
+        _sources = sources;
     }
 
     public Task<ScanResult> ScanAsync(string root, ScanOptions options, IProgress<ScanProgress>? progress, CancellationToken ct)
@@ -72,6 +82,7 @@ public sealed class FileScannerService : IFileScannerService
                 }
             }
             inaccessible = en.ErrorCount;
+            if (_sources != null) ReadSources(list, ct);
             progress?.Report(new ScanProgress(list.Count, bytes, root));
             _log.Info($"Сканирование {root}: {list.Count} файлов, недоступно: {inaccessible}, {sw.ElapsedMilliseconds} мс");
             return new ScanResult { Files = list, InaccessibleCount = inaccessible, Duration = sw.Elapsed };
@@ -84,14 +95,33 @@ public sealed class FileScannerService : IFileScannerService
         {
             var info = new FileInfo(path);
             if (!info.Exists) return null;
-            return Create(_detector, info.FullName, info.Name, info.Length,
+            var entry = Create(_detector, info.FullName, info.Name, info.Length,
                 info.CreationTime, info.LastWriteTime);
+            return WithSource(entry);
         }
         catch (Exception ex)
         {
             _log.Warn($"Не удалось получить сведения о файле {path}: {ex.Message}");
             return null;
         }
+    }
+
+    private FileEntry WithSource(FileEntry entry) =>
+        _sources?.TryRead(entry.FullPath) is { } s ? entry with { SourceHost = s.Host, SourceUrl = s.Url } : entry;
+
+    /// <summary>
+    /// Источники читаются после обхода папки и параллельно: метка есть лишь у части файлов,
+    /// а последовательная проверка 16 тысяч файлов занимала ~0,5 с против ~0,15 с в 4 потока.
+    /// </summary>
+    private void ReadSources(List<FileEntry> list, CancellationToken ct)
+    {
+        var options = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Math.Clamp(Environment.ProcessorCount, 2, 4),
+            CancellationToken = ct
+        };
+        // Каждый поток пишет только в свой индекс - список при этом не меняет размер.
+        Parallel.For(0, list.Count, options, i => list[i] = WithSource(list[i]));
     }
 
     private static FileEntry Create(IFileTypeDetectionService d, string fullPath, string name, long size, DateTime created, DateTime modified)

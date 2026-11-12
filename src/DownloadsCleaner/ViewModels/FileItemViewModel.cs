@@ -23,6 +23,12 @@ public sealed partial class FileItemViewModel : ObservableObject
     public string Name => Entry.Name;
     public string FullPath => Entry.FullPath;
     public string Folder => Entry.Directory;
+
+    /// <summary>Сайт-источник с разделителем перед папкой ("github.com · ") или пустая строка.</summary>
+    public string SourcePrefix => Entry.SourceHost is { } host ? host + " · " : string.Empty;
+
+    /// <summary>Полный адрес загрузки для подсказки (null - подсказки нет).</summary>
+    public string? SourceUrl => Entry.SourceUrl;
     public FileCategory Category => Entry.Category;
     public long Size => Entry.Size;
     public bool IsTemporary => Entry.IsTemporary;

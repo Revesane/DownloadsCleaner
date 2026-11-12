@@ -154,7 +154,8 @@ public sealed partial class PreviewViewModel : ObservableObject
         Loc.F("PreviewInfoType", $"{FileCategoryInfo.Title(e.Category)} ({(e.Extension.Length == 0 ? Loc.T("PreviewNoExtension") : "." + e.Extension)})") + "\n" +
         Loc.F("PreviewInfoSize", ByteFormatter.Format(e.Size)) + "\n" +
         Loc.F("PreviewInfoCreated", e.Created.ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture)) + "\n" +
-        Loc.F("PreviewInfoModified", e.Modified.ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture));
+        Loc.F("PreviewInfoModified", e.Modified.ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture)) +
+        (e.SourceHost is { } host ? "\n" + Loc.F("PreviewInfoSource", host) : string.Empty);
 
     /// <summary>
     /// Создаёт file-URI для MediaElement. Простой new Uri(path) бросает исключение

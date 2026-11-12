@@ -261,6 +261,13 @@ public sealed partial class FileListViewModel : ObservableObject
         ApplyPreset(preset);
     }
 
+    /// <summary>Сбрасывает фильтры и ищет по строке (например, по сайту-источнику из аналитики).</summary>
+    public void ShowSearch(string search)
+    {
+        ResetFilters(FilePreset.None);
+        SearchText = search;
+    }
+
     public void ApplyPreset(FilePreset preset)
     {
         switch (preset)
@@ -527,7 +534,8 @@ public sealed partial class FileListViewModel : ObservableObject
             if (sizeLimit != null && f.Size < sizeLimit) continue;
             if (search.Length > 0
                 && !f.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(f.Extension, searchExt, StringComparison.OrdinalIgnoreCase)) continue;
+                && !string.Equals(f.Extension, searchExt, StringComparison.OrdinalIgnoreCase)
+                && !(f.SourceHost?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)) continue;
 
             switch (s.Rule)
             {

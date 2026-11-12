@@ -47,6 +47,7 @@ public sealed partial class ShellViewModel : ObservableObject
     private readonly SettingsViewModel _settingsPage;
     private readonly AnalyticsViewModel _analytics;
     private FilePreset _pendingPreset;
+    private string? _pendingSearch;
     private bool _syncingCategory;
     private CancellationTokenSource? _rescanDebounce;
 
@@ -169,7 +170,9 @@ public sealed partial class ShellViewModel : ObservableObject
         OnPropertyChanged(nameof(PageTitle));
         if (value == null || _syncingCategory) return;
         var preset = _pendingPreset;
+        var search = _pendingSearch;
         _pendingPreset = FilePreset.None;
+        _pendingSearch = null;
 
         switch (value.Kind)
         {
@@ -180,6 +183,7 @@ public sealed partial class ShellViewModel : ObservableObject
             case NavKind.Settings: CurrentPage = _settingsPage; break;
             default:
                 Files.SetCategory(CategoryOf(value.Kind), preset);
+                if (search != null) Files.ShowSearch(search);
                 CurrentPage = Files;
                 break;
         }
@@ -196,9 +200,11 @@ public sealed partial class ShellViewModel : ObservableObject
         if (ReferenceEquals(SelectedNav, item))
         {
             if (request.Preset != FilePreset.None) Files.ApplyPreset(request.Preset);
+            if (request.Search != null) Files.ShowSearch(request.Search);
             return;
         }
         _pendingPreset = request.Preset;
+        _pendingSearch = request.Search;
         SelectedNav = item;
     }
 

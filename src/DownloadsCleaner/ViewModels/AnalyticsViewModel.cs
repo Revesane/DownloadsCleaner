@@ -14,17 +14,24 @@ public sealed record AgeRow(string Title, int Count, string BytesText, double Sh
 
 public sealed record BigFileRow(FileEntry Entry, string Name, string Folder, string SizeText, FileCategory Category);
 
+/// <param name="Share">Длина полоски: доля от самого частого источника (0..1).</param>
+public sealed record SourceRow(string Host, int Count, string BytesText, double Share);
+
 /// <summary>Аналитика места: все значения считаются из реальных результатов сканирования.</summary>
 public sealed partial class AnalyticsViewModel : ObservableObject, IDisposable
 {
     private readonly IFileLibrary _library;
+    private const int TopSources = 10;
+
     private readonly ISettingsService _settings;
+    private readonly INavigationService _navigation;
     private readonly UiDebouncer _rebuildDebounce;
 
-    public AnalyticsViewModel(IFileLibrary library, ISettingsService settings)
+    public AnalyticsViewModel(IFileLibrary library, ISettingsService settings, INavigationService navigation)
     {
         _library = library;
         _settings = settings;
+        _navigation = navigation;
         // Аналитика пересчитывается по всей библиотеке, поэтому пачка изменений
         // (например, тысяча новых файлов) не должна запускать пересчёт на каждый файл.
         _rebuildDebounce = new UiDebouncer(TimeSpan.FromMilliseconds(300), Rebuild);
@@ -45,6 +52,9 @@ public sealed partial class AnalyticsViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _diskDetail = string.Empty;
     [ObservableProperty] private double _diskFraction;
     [ObservableProperty] private double _folderShare;
+    [ObservableProperty] private IReadOnlyList<SourceRow> _sources = Array.Empty<SourceRow>();
+    [ObservableProperty] private bool _hasSources;
+    [ObservableProperty] private string _sourcesCoverage = string.Empty;
 
     private void Rebuild()
     {
@@ -76,13 +86,33 @@ public sealed partial class AnalyticsViewModel : ObservableObject, IDisposable
         var quarterAgo = now.AddDays(-90);
         int c7 = 0, c30 = 0, c90 = 0, cOld = 0;
         long b7 = 0, b30 = 0, b90 = 0, bOld = 0;
+        // Источники считаем в том же проходе.
+        var bySource = new Dictionary<string, (int Count, long Bytes)>(StringComparer.OrdinalIgnoreCase);
+        var withSource = 0;
         foreach (var f in files)
         {
             if (f.Created >= weekAgo) { c7++; b7 += f.Size; }
             else if (f.Created >= monthAgo) { c30++; b30 += f.Size; }
             else if (f.Created >= quarterAgo) { c90++; b90 += f.Size; }
             else { cOld++; bOld += f.Size; }
+
+            if (f.SourceHost is { } host)
+            {
+                withSource++;
+                var s = bySource.GetValueOrDefault(host);
+                bySource[host] = (s.Count + 1, s.Bytes + f.Size);
+            }
         }
+
+        var top = bySource
+            .OrderByDescending(p => p.Value.Count).ThenByDescending(p => p.Value.Bytes)
+            .Take(TopSources).ToList();
+        var maxCount = top.Count > 0 ? top[0].Value.Count : 1;
+        Sources = top.Select(p => new SourceRow(p.Key, p.Value.Count, ByteFormatter.Format(p.Value.Bytes),
+            (double)p.Value.Count / maxCount)).ToList();
+        HasSources = top.Count > 0;
+        SourcesCoverage = Loc.F("AnalyticsSourcesCoverage", withSource.ToString("N0"), files.Count.ToString("N0"),
+            bySource.Count.ToString("N0"));
 
         double Share(long bytes) => stats.TotalBytes > 0 ? (double)bytes / stats.TotalBytes : 0;
 
@@ -140,5 +170,12 @@ public sealed partial class AnalyticsViewModel : ObservableObject, IDisposable
     private void ShowInExplorer(BigFileRow? row)
     {
         if (row != null) ShellHelper.ShowInExplorer(row.Entry.FullPath);
+    }
+
+    /// <summary>Открывает список всех файлов, скачанных с этого сайта.</summary>
+    [RelayCommand]
+    private void ShowSourceFiles(SourceRow? row)
+    {
+        if (row != null) _navigation.Go(NavKind.All, FilePreset.None, row.Host);
     }
 }

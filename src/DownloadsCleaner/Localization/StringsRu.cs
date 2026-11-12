@@ -297,6 +297,10 @@ internal static class StringsRu
         ["AnalyticsFolderPrefix"] = "Папка загрузок занимает ",
         ["AnalyticsFolderSuffix"] = " объёма диска.",
         ["AnalyticsBiggest"] = "Самые крупные файлы",
+        ["AnalyticsSources"] = "Откуда скачано",
+        ["AnalyticsSourcesCoverage"] = "Источник известен у {0} из {1} файлов · сайтов: {2}. Его записывает браузер при загрузке.",
+        ["AnalyticsSourcesEmpty"] = "Источники не найдены: у файлов нет метки браузера (например, они распакованы из архива или скопированы).",
+        ["AnalyticsShowFiles"] = "Показать файлы с этого сайта",
         ["AgeUnder7"] = "Младше 7 дней",
         ["Age7to30"] = "7–30 дней",
         ["Age30to90"] = "30–90 дней",
@@ -332,6 +336,7 @@ internal static class StringsRu
         ["PreviewInfoSize"] = "Размер: {0}",
         ["PreviewInfoCreated"] = "Создан: {0}",
         ["PreviewInfoModified"] = "Изменён: {0}",
+        ["PreviewInfoSource"] = "Источник: {0}",
         ["PreviewNoExtension"] = "без расширения",
 
         // ---------- Ошибки файловых операций ----------

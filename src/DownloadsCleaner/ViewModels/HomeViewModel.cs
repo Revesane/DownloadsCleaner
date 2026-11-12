@@ -13,18 +13,20 @@ public enum NavKind
     Home, All, Audio, Video, Images, Documents, Archives, Programs, Models3D, Other, Analytics, Duplicates, History, Settings
 }
 
-public sealed record NavRequest(NavKind Kind, FilePreset Preset = FilePreset.None);
+/// <param name="Search">Строка поиска для списка файлов (null - поиск не меняется).</param>
+public sealed record NavRequest(NavKind Kind, FilePreset Preset = FilePreset.None, string? Search = null);
 
 public interface INavigationService
 {
     event Action<NavRequest>? Requested;
-    void Go(NavKind kind, FilePreset preset = FilePreset.None);
+    void Go(NavKind kind, FilePreset preset = FilePreset.None, string? search = null);
 }
 
 public sealed class NavigationService : INavigationService
 {
     public event Action<NavRequest>? Requested;
-    public void Go(NavKind kind, FilePreset preset = FilePreset.None) => Requested?.Invoke(new NavRequest(kind, preset));
+    public void Go(NavKind kind, FilePreset preset = FilePreset.None, string? search = null) =>
+        Requested?.Invoke(new NavRequest(kind, preset, search));
 }
 
 public sealed partial class CategoryCardViewModel : ObservableObject

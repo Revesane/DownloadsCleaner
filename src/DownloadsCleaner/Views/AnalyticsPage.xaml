@@ -148,6 +148,43 @@
                         </ItemsControl>
                     </StackPanel>
                 </Border>
+
+                <!-- Откуда скачано (метка браузера Zone.Identifier) -->
+                <Border Style="{StaticResource Card}" Padding="22,18" Margin="0,14,0,0" m:Motion.Entrance="FadeUp" m:Motion.EntranceDelay="240">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T AnalyticsSources}" Style="{StaticResource TextHeading}"/>
+                        <TextBlock Text="{Binding SourcesCoverage}" Style="{StaticResource TextCaption}" Margin="0,3,0,10" TextWrapping="Wrap"/>
+                        <TextBlock Text="{loc:T AnalyticsSourcesEmpty}" Style="{StaticResource TextSecondary}" TextWrapping="Wrap"
+                                   Visibility="{Binding HasSources, Converter={StaticResource BoolToVis}, ConverterParameter=invert}"/>
+                        <ItemsControl ItemsSource="{Binding Sources}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:SourceRow}">
+                                    <Grid Height="44" Background="Transparent">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="200"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="40"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.ColumnSpan="4" CornerRadius="8" Background="{DynamicResource HoverOverlayBrush}" Opacity="0"
+                                                m:Motion.State="Hover" IsHitTestVisible="False"/>
+                                        <StackPanel VerticalAlignment="Center" Margin="4,0,8,0">
+                                            <TextBlock Text="{Binding Host}" Style="{StaticResource TextBody}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Host}"/>
+                                            <TextBlock Style="{StaticResource TextCaption}"><Run Text="{Binding Count, Mode=OneWay}"/><Run Text="{loc:T AnalyticsFilesSuffix}"/></TextBlock>
+                                        </StackPanel>
+                                        <ProgressBar Grid.Column="1" Style="{StaticResource ModernProgress}" Height="8" VerticalAlignment="Center" Margin="8,0"
+                                                     m:Motion.AnimatedValue="{Binding Share}"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding BytesText}" Style="{StaticResource TextBody}" TextAlignment="Right" VerticalAlignment="Center"/>
+                                        <Button Grid.Column="3" Style="{StaticResource IconButton}" Content="&#xE71E;" ToolTip="{loc:T AnalyticsShowFiles}"
+                                                Command="{Binding DataContext.ShowSourceFilesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

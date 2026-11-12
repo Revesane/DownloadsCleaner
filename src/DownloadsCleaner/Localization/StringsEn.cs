@@ -297,6 +297,10 @@ internal static class StringsEn
         ["AnalyticsFolderPrefix"] = "The Downloads folder takes ",
         ["AnalyticsFolderSuffix"] = " of the drive.",
         ["AnalyticsBiggest"] = "Largest files",
+        ["AnalyticsSources"] = "Where files came from",
+        ["AnalyticsSourcesCoverage"] = "Source known for {0} of {1} files · sites: {2}. The browser records it when downloading.",
+        ["AnalyticsSourcesEmpty"] = "No sources found: files have no browser download mark (for example, they were extracted from an archive or copied).",
+        ["AnalyticsShowFiles"] = "Show files from this site",
         ["AgeUnder7"] = "Under 7 days",
         ["Age7to30"] = "7–30 days",
         ["Age30to90"] = "30–90 days",
@@ -332,6 +336,7 @@ internal static class StringsEn
         ["PreviewInfoSize"] = "Size: {0}",
         ["PreviewInfoCreated"] = "Created: {0}",
         ["PreviewInfoModified"] = "Modified: {0}",
+        ["PreviewInfoSource"] = "Source: {0}",
         ["PreviewNoExtension"] = "no extension",
 
         // ---------- File operation errors ----------

@@ -75,6 +75,7 @@ public partial class App : Application
         s.AddSingleton<ISettingsService>(sp => new SettingsService(null, sp.GetRequiredService<ILogService>()));
         s.AddSingleton<IThemeService, ThemeService>();
         s.AddSingleton<IFileTypeDetectionService, FileTypeDetectionService>();
+        s.AddSingleton<IDownloadSourceReader, ZoneIdentifierSourceReader>();
         s.AddSingleton<IFileScannerService, FileScannerService>();
         s.AddSingleton<IFileOrganizationService, FileOrganizationService>();
         s.AddSingleton<IRecycleBinQuota, WindowsRecycleBinQuota>();
