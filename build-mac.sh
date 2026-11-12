@@ -26,8 +26,14 @@ case "$RID" in
   *) echo "Неизвестный runtime: $RID (ожидается osx-arm64 или osx-x64)" >&2; exit 1 ;;
 esac
 
-echo "== Публикация $RID =="
+if [ -z "${VERSION:-}" ]; then
+  VERSION="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' "$PROJECT" | head -1)"
+fi
+VERSION="${VERSION:-1.0.0}"
+
+echo "== Публикация $RID (версия $VERSION) =="
 rm -rf "$OUT"
+FILES="$OUT/files"
 dotnet publish "$PROJECT" \
     -c Release \
     -r "$RID" \
@@ -35,17 +41,67 @@ dotnet publish "$PROJECT" \
     -p:PublishSingleFile=false \
     -p:DebugType=none \
     -p:DebugSymbols=false \
-    ${VERSION:+-p:Version=$VERSION} \
-    -o "$OUT" \
+    -p:Version="$VERSION" \
+    -o "$FILES" \
     --nologo
 
-# .app создаётся самим SDK при публикации с -r osx-*; переименовываем его в человеческое имя.
-APP="$OUT/DownloadsCleaner.Mac.app"
-if [ -d "$APP" ]; then
-  mv "$APP" "$OUT/Downloads Cleaner.app"
-  # Имя исполняемого файла внутри пакета должно совпадать с именем пакета.
-  mv "$OUT/Downloads Cleaner.app/Contents/MacOS/DownloadsCleaner.Mac" \
-     "$OUT/Downloads Cleaner.app/Contents/MacOS/Downloads Cleaner" 2>/dev/null || true
+# ---- Пакет .app ----
+# dotnet publish кладёт только файлы программы; пакет macOS собираем сами:
+#   Downloads Cleaner.app/Contents/{Info.plist, MacOS/<файлы программы>, Resources/AppIcon.icns}
+APP="$OUT/Downloads Cleaner.app"
+EXE="DownloadsCleaner.Mac"
+echo "== Пакет $APP =="
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+cp -R "$FILES/." "$APP/Contents/MacOS/"
+rm -rf "$FILES"
+chmod +x "$APP/Contents/MacOS/$EXE"
+cp "installer/macos/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
+# Идентификатор совпадает с меткой автозапуска (MacAutostartService.Label).
+cat > "$APP/Contents/Info.plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Downloads Cleaner</string>
+    <key>CFBundleDisplayName</key>
+    <string>Downloads Cleaner</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.revesane.downloadscleaner</string>
+    <key>CFBundleExecutable</key>
+    <string>$EXE</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$VERSION</string>
+    <key>CFBundleVersion</key>
+    <string>$VERSION</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>12.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+</dict>
+</plist>
+PLIST
+
+# Ad-hoc подпись (без сертификата): без подписи Apple Silicon вообще не запускает программу.
+# Предупреждение «не удалось проверить разработчика» при первом запуске всё равно будет.
+if command -v codesign >/dev/null 2>&1; then
+  echo "== Подпись (ad-hoc) =="
+  # Сначала каждый исполняемый файл и библиотеку (.dylib) внутри, потом сам пакет.
+  find "$APP/Contents/MacOS" -type f | while IFS= read -r f; do
+    if file -b "$f" | grep -q "Mach-O"; then codesign --force --sign - "$f"; fi
+  done
+  codesign --force --sign - "$APP"
+  codesign --verify --deep --strict --verbose=2 "$APP"
+else
+  echo "(подпись делается только на macOS - пропущено)"
 fi
 
 # ---- Установщик .dmg: программа + ярлык на «Программы» для перетаскивания ----
