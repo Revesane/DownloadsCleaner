@@ -16,9 +16,11 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly ILogService _log;
     private readonly IFolderPickerService _folders;
 
+    /// <param name="updates">Обновления программы; null там, где их нет (версия для macOS).</param>
     public SettingsViewModel(ISettingsService service, IOperationsCoordinator operations, ILogService log,
-        IFolderPickerService folders)
+        IFolderPickerService folders, UpdateViewModel? updates = null)
     {
+        Updates = updates;
         _service = service;
         _operations = operations;
         _log = log;
@@ -31,6 +33,8 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     public AppSettings Settings => _service.Current;
+    public UpdateViewModel? Updates { get; }
+    public bool HasUpdates => Updates != null;
 
     // Списки создаются один раз: при смене языка обновляются подписи по месту,
     // иначе ComboBox сбросил бы выбранное значение.

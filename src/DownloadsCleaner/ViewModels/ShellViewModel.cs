@@ -174,6 +174,8 @@ public sealed partial class ShellViewModel : ObservableObject
         _operations.ApplyWatcherSettings();
         if (_settings.Current.ScanOnStartup)
             await _operations.ScanAsync();
+        // Тихая проверка новой версии: без сети или без обновления ничего не показывается.
+        if (_settingsPage.Updates is { } updates) await updates.CheckOnStartupAsync();
     }
 
     // ------------------------------------------------------------ Навигация

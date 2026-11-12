@@ -56,6 +56,8 @@ public sealed partial class AppSettings : ObservableObject
     [ObservableProperty] private bool _allowContentHashing;
     /// <summary>Показывать опцию безвозвратного удаления (по умолчанию - только Корзина).</summary>
     [ObservableProperty] private bool _allowPermanentDelete;
+    /// <summary>При запуске спрашивать у GitHub, нет ли новой версии (одна короткая проверка).</summary>
+    [ObservableProperty] private bool _checkUpdatesOnStartup = true;
 
     public ObservableCollection<string> ExcludedExtensions { get; set; } = new();
     public ObservableCollection<string> ExcludedFolders { get; set; } = new();

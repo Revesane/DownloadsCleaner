@@ -22,6 +22,9 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // После самообновления: дождаться закрытия прежней версии и убрать её файл (.old).
+        GitHubUpdateService.HandleStartup(e.Args);
+
         // Мьютекс проверяем через WaitOne: конструктор Mutex(owned: true) не запрашивает
         // владение, и после аварийного завершения прошлого экземпляра приложение
         // не смогло бы запуститься.
@@ -105,6 +108,8 @@ public partial class App : Application
         s.AddSingleton<IInstallerInfoReader, FileVersionInstallerInfoReader>();
         s.AddSingleton<ISmartTipsService, SmartTipsService>();
         s.AddSingleton<SmartTipsViewModel>();
+        s.AddSingleton<IUpdateService, GitHubUpdateService>();
+        s.AddSingleton<UpdateViewModel>();
         s.AddSingleton<ShellViewModel>();
     }
 

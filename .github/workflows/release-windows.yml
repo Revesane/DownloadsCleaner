@@ -1,0 +1,55 @@
+name: release-windows
+
+# Выпуск для Windows: по тегу vX.Y.Z собирает однофайловый self-contained exe с этой версией
+# и создаёт выпуск GitHub с архивом DownloadsCleaner-win-x64.zip.
+# Этот архив скачивает кнопка «Проверить обновления» в программе.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Версия из тега
+        id: ver
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart('v')
+          if ($v -notmatch '^\d+\.\d+(\.\d+){0,2}$') { throw "Тег должен быть вида v1.2.3, а не ${{ github.ref_name }}" }
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Тесты
+        run: dotnet test tests/DownloadsCleaner.Tests/DownloadsCleaner.Tests.csproj -c Release --nologo
+
+      - name: Публикация (один exe, .NET устанавливать не нужно)
+        run: >
+          dotnet publish src/DownloadsCleaner/DownloadsCleaner.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
+          -p:DebugType=none -p:DebugSymbols=false
+          -p:Version=${{ steps.ver.outputs.version }}
+          -o publish/win-x64 --nologo
+
+      - name: Архив
+        shell: pwsh
+        run: Compress-Archive -Path publish/win-x64/DownloadsCleaner.exe -DestinationPath publish/DownloadsCleaner-win-x64.zip
+
+      - name: Выпуск на GitHub
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "${{ github.ref_name }}" publish/DownloadsCleaner-win-x64.zip
+          --title "Downloads Cleaner ${{ steps.ver.outputs.version }}" --generate-notes

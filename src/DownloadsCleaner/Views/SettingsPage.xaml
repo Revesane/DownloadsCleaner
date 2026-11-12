@@ -259,6 +259,50 @@
                     <StackPanel>
                         <TextBlock Style="{StaticResource TextHeading}" Text="{loc:T SettingsAbout}" Margin="0,4,0,8"/>
                         <TextBlock Style="{StaticResource TextBody}"><Run Text="Downloads Cleaner "/><Run Text="{Binding Version, Mode=OneWay}"/></TextBlock>
+
+                        <!-- Обновления (только там, где они поддерживаются) -->
+                        <Border Visibility="{Binding HasUpdates, Converter={StaticResource BoolToVis}}" Margin="0,12,0,4" Padding="16,14"
+                                CornerRadius="12" Background="{DynamicResource BgElevatedBrush}" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1"
+                                DataContext="{Binding Updates}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="36" Height="36" CornerRadius="11" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE895;" Style="{StaticResource IconText}" FontSize="16" Foreground="{DynamicResource AccentBrush}"
+                                                   m:Motion.SpinWhen="{Binding IsBusy}"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{loc:T UpdTitle}" Style="{StaticResource TextBody}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding StatusText}" Style="{StaticResource TextCaption}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Style="{StaticResource SecondaryButton}" Content="{loc:T UpdCheck}" Command="{Binding CheckCommand}" Padding="14,7"/>
+                                        <Button Style="{StaticResource PrimaryButton}" Content="{Binding InstallText}" Command="{Binding InstallCommand}" Padding="14,7"
+                                                Margin="8,0,0,0" Visibility="{Binding HasUpdate, Converter={StaticResource BoolToVis}}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <ProgressBar Style="{StaticResource ModernProgress}" Height="6" Margin="0,12,0,0" Maximum="1"
+                                             m:Motion.AnimatedValue="{Binding Progress}"
+                                             Visibility="{Binding IsDownloading, Converter={StaticResource BoolToVis}}"/>
+                                <TextBlock Text="{Binding Notes}" Style="{StaticResource TextCaption}" TextWrapping="Wrap" Margin="48,10,0,0"
+                                           Visibility="{Binding HasUpdate, Converter={StaticResource BoolToVis}}"/>
+                                <Button Style="{StaticResource GhostButton}" Content="{loc:T UpdOpenPage}" Command="{Binding OpenReleasePageCommand}"
+                                        HorizontalAlignment="Left" Padding="10,5" Margin="40,6,0,0"
+                                        Visibility="{Binding HasUpdate, Converter={StaticResource BoolToVis}}"/>
+                            </StackPanel>
+                        </Border>
+                        <Grid Margin="0,6,0,8" Visibility="{Binding HasUpdates, Converter={StaticResource BoolToVis}}">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,20,0" VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource TextBody}" FontWeight="SemiBold" Text="{loc:T SettingsCheckUpdates}"/>
+                                <TextBlock Style="{StaticResource TextCaption}" TextWrapping="Wrap" Margin="0,2,0,0" Text="{loc:T SettingsCheckUpdatesHint}"/>
+                            </StackPanel>
+                            <ContentControl Grid.Column="1" VerticalAlignment="Center"><ToggleButton Style="{StaticResource SwitchToggle}" IsChecked="{Binding Settings.CheckUpdatesOnStartup, Mode=TwoWay}"/></ContentControl>
+                        </Grid>
                         <TextBlock Style="{StaticResource TextCaption}" Margin="0,6,0,0" TextWrapping="Wrap"><Run Text="{loc:T SettingsPathLabel}"/><Run Text="{Binding SettingsPath, Mode=OneWay}"/></TextBlock>
                         <TextBlock Style="{StaticResource TextCaption}" Margin="0,2,0,10" TextWrapping="Wrap"><Run Text="{loc:T SettingsLogLabel}"/><Run Text="{Binding LogDirectory, Mode=OneWay}"/></TextBlock>
                         <Button Style="{StaticResource SecondaryButton}" Content="{loc:T SettingsOpenLogFolder}" Command="{Binding OpenLogFolderCommand}"
