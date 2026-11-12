@@ -85,7 +85,8 @@ jobs:
   macos:
     name: macOS ${{ matrix.rid }}
     needs: release
-    runs-on: macos-14
+    # macos-14 больше не выдаётся («configuration is not supported»); osx-x64 собирается и на ARM-машине.
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:

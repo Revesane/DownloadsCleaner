@@ -1,17 +1,27 @@
 name: build-macos
 
-# Проверочная сборка версии для macOS (по кнопке Run workflow во вкладке Actions).
-# Артефакты: .app и установщик .dmg для Apple Silicon и Intel.
-# Выпуски по тегу собирает release (release-windows.yml) - он же прикладывает .dmg к выпуску.
+# Сборка версии для macOS по кнопке Run workflow во вкладке Actions:
+# .app и установщик .dmg для Apple Silicon и Intel.
+# Если указать тег выпуска (например v1.2.0), .dmg собираются с этой версией
+# и добавляются к выпуску - так можно досборать Mac-часть уже вышедшего выпуска.
 # Тесты здесь не запускаются: тестовый проект собирается только под Windows.
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Тег выпуска, к которому добавить .dmg (пусто - только артефакты)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
 
 jobs:
   build:
     name: macOS ${{ matrix.rid }}
-    runs-on: macos-14
+    # macos-14 больше не выдаётся («configuration is not supported»); osx-x64 собирается и на ARM-машине.
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
@@ -26,11 +36,22 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Сборка .app и установщика .dmg
-        run: ./build-mac.sh ${{ matrix.rid }}
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [ -n "$RELEASE_TAG" ]; then export VERSION="${RELEASE_TAG#v}"; fi
+          ./build-mac.sh ${{ matrix.rid }}
 
-      - name: Загрузить .dmg
+      - name: Загрузить .dmg (артефакт)
         uses: actions/upload-artifact@v4
         with:
           name: DownloadsCleaner-${{ matrix.rid }}
           path: publish/macos/*.dmg
           if-no-files-found: error
+
+      - name: Добавить .dmg к выпуску
+        if: ${{ inputs.release_tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: gh release upload "$RELEASE_TAG" publish/macos/*.dmg --clobber
