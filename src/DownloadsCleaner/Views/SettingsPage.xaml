@@ -53,6 +53,31 @@
                 <Border Style="{StaticResource Card}" Margin="0,0,0,14" Padding="22,14" m:Motion.Entrance="FadeUp" m:Motion.EntranceDelay="80">
                     <StackPanel>
                     <TextBlock Style="{StaticResource TextHeading}" Text="{loc:T SettingsBehavior}" Margin="0,4,0,4"/>
+                    <!-- Трей и автозапуск (только Windows) -->
+                    <StackPanel Visibility="{Binding HasAutostart, Converter={StaticResource BoolToVis}}">
+                        <Grid Margin="0,9">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,20,0" VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource TextBody}" FontWeight="SemiBold" Text="{loc:T SettingsMinimizeToTray}"/>
+                                <TextBlock Style="{StaticResource TextCaption}" TextWrapping="Wrap" Margin="0,2,0,0" Text="{loc:T SettingsMinimizeToTrayHint}"/>
+                            </StackPanel>
+                            <ContentControl Grid.Column="1" VerticalAlignment="Center"><ToggleButton Style="{StaticResource SwitchToggle}" IsChecked="{Binding Settings.MinimizeToTray, Mode=TwoWay}"/></ContentControl>
+                        </Grid>
+                        <Border Height="1" Background="{DynamicResource StrokeBrush}"/>
+                        <Grid Margin="0,9">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,20,0" VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource TextBody}" FontWeight="SemiBold" Text="{loc:T SettingsAutostart}"/>
+                                <TextBlock Style="{StaticResource TextCaption}" TextWrapping="Wrap" Margin="0,2,0,0" Text="{loc:T SettingsAutostartHint}"
+                                           Visibility="{Binding AutostartAvailable, Converter={StaticResource BoolToVis}}"/>
+                                <TextBlock Style="{StaticResource TextCaption}" TextWrapping="Wrap" Margin="0,2,0,0" Text="{loc:T SettingsAutostartDevHint}"
+                                           Foreground="{DynamicResource WarningBrush}"
+                                           Visibility="{Binding AutostartAvailable, Converter={StaticResource BoolToVis}, ConverterParameter=invert}"/>
+                            </StackPanel>
+                            <ContentControl Grid.Column="1" VerticalAlignment="Center"><ToggleButton Style="{StaticResource SwitchToggle}" IsChecked="{Binding AutostartEnabled, Mode=TwoWay}" IsEnabled="{Binding AutostartAvailable}"/></ContentControl>
+                        </Grid>
+                        <Border Height="1" Background="{DynamicResource StrokeBrush}"/>
+                    </StackPanel>
                     <Grid Margin="0,9">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,20,0" VerticalAlignment="Center">

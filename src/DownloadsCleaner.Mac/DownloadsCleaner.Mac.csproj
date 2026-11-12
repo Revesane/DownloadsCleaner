@@ -49,6 +49,7 @@
     <Compile Include="..\DownloadsCleaner\Services\SettingsService.cs" />
     <Compile Include="..\DownloadsCleaner\Services\SmartTips.cs" />
     <Compile Include="..\DownloadsCleaner\Services\Updates.cs" />
+    <Compile Include="..\DownloadsCleaner\Services\Autostart.cs" />
     <Compile Include="..\DownloadsCleaner\Services\ToastService.cs" />
     <Compile Include="..\DownloadsCleaner\ViewModels\AnalyticsViewModel.cs" />
     <Compile Include="..\DownloadsCleaner\ViewModels\DialogViewModels.cs" />

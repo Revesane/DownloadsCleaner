@@ -57,9 +57,10 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     /// <param name="updates">Обновления программы; null там, где их нет (версия для macOS).</param>
     public SettingsViewModel(ISettingsService service, IOperationsCoordinator operations, ILogService log,
-        IFolderPickerService folders, UpdateViewModel? updates = null)
+        IFolderPickerService folders, UpdateViewModel? updates = null, IAutostartService? autostart = null)
     {
         Updates = updates;
+        _autostart = autostart;
         _service = service;
         _operations = operations;
         _log = log;
@@ -102,6 +103,25 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
     public UpdateViewModel? Updates { get; }
     public bool HasUpdates => Updates != null;
+
+    private readonly IAutostartService? _autostart;
+
+    /// <summary>Трей и автозапуск есть только там, где есть их реализация (Windows).</summary>
+    public bool HasAutostart => _autostart != null;
+
+    /// <summary>Автозапуск можно включить только у установленной копии, не у сборки из исходников.</summary>
+    public bool AutostartAvailable => _autostart?.IsAvailable == true;
+
+    /// <summary>Состояние читается из системы (реестр), а не из файла настроек - так оно всегда честное.</summary>
+    public bool AutostartEnabled
+    {
+        get => _autostart?.IsEnabled == true;
+        set
+        {
+            _autostart?.SetEnabled(value);
+            OnPropertyChanged();
+        }
+    }
 
     // Списки создаются один раз: при смене языка обновляются подписи по месту,
     // иначе ComboBox сбросил бы выбранное значение.

@@ -41,10 +41,24 @@ public partial class App : Application
 
         if (!_ownsMutex)
         {
-            MessageBox.Show(Loc.T("AppAlreadyRunning"), "Downloads Cleaner", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Программа уже работает (возможно, спрятана в трей): просим её показать окно.
+            try
+            {
+                using var signal = EventWaitHandle.OpenExisting(ShowSignalName);
+                signal.Set();
+            }
+            catch
+            {
+                MessageBox.Show(Loc.T("AppAlreadyRunning"), "Downloads Cleaner", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
             Shutdown();
             return;
         }
+
+        // Сигнал «покажи окно» от повторного запуска.
+        _showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, ShowSignalName);
+        ThreadPool.RegisterWaitForSingleObject(_showSignal, (_, _) => Dispatcher.BeginInvoke(ShowMainWindow), null, -1, false);
+        SessionEnding += (_, _) => _exiting = true;
 
         DispatcherUnhandledException += OnDispatcherException;
         TaskScheduler.UnobservedTaskException += (_, args) =>
@@ -68,8 +82,62 @@ public partial class App : Application
 
         var shell = _services.GetRequiredService<ShellViewModel>();
         var window = new MainWindow { DataContext = shell };
-        window.Show();
+        MainWindow = window;
+        window.Closing += OnMainWindowClosing;
+
+        _tray = new TrayIcon();
+        _tray.OpenRequested += ShowMainWindow;
+        _tray.ScanRequested += () =>
+        {
+            ShowMainWindow();
+            shell.ScanCommand.Execute(null);
+        };
+        _tray.ExitRequested += ExitApplication;
+
+        // Из автозагрузки (--minimized) программа стартует сразу в трей: следит за папкой без окна.
+        if (!e.Args.Contains("--minimized", StringComparer.OrdinalIgnoreCase)) window.Show();
         _ = shell.InitializeAsync();
+    }
+
+    private const string ShowSignalName = "DownloadsCleaner.ShowWindow";
+    private EventWaitHandle? _showSignal;
+    private TrayIcon? _tray;
+    private bool _exiting;
+
+    /// <summary>Возвращает окно из трея (или из свёрнутого состояния) на передний план.</summary>
+    public void ShowMainWindow()
+    {
+        if (MainWindow is not { } w) return;
+        if (!w.IsVisible) w.Show();
+        if (w.WindowState == WindowState.Minimized) w.WindowState = WindowState.Normal;
+        w.Activate();
+        // Windows не всегда отдаёт фокус окну из фона - кратковременный Topmost выводит его вперёд.
+        w.Topmost = true;
+        w.Topmost = false;
+        w.Focus();
+    }
+
+    /// <summary>Настоящий выход (меню трея, перезапуск после обновления), а не сворачивание.</summary>
+    public void ExitApplication()
+    {
+        _exiting = true;
+        Shutdown();
+    }
+
+    /// <summary>Крестик прячет окно в трей: программа продолжает следить за загрузками.</summary>
+    private void OnMainWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (_exiting || _tray == null || _services == null) return;
+        var settings = _services.GetRequiredService<ISettingsService>().Current;
+        if (!settings.MinimizeToTray) return;
+
+        e.Cancel = true;
+        MainWindow?.Hide();
+        if (!settings.TrayHintShown)
+        {
+            _tray.ShowHint(Loc.T("TrayHintTitle"), Loc.T("TrayHintText"));
+            settings.TrayHintShown = true;
+        }
     }
 
     private static void ConfigureServices(IServiceCollection s)
@@ -109,6 +177,7 @@ public partial class App : Application
         s.AddSingleton<ISmartTipsService, SmartTipsService>();
         s.AddSingleton<SmartTipsViewModel>();
         s.AddSingleton<IUpdateService, GitHubUpdateService>();
+        s.AddSingleton<IAutostartService, RegistryAutostartService>();
         s.AddSingleton<UpdateViewModel>();
         s.AddSingleton<ShellViewModel>();
     }
@@ -128,6 +197,8 @@ public partial class App : Application
     {
         try
         {
+            _tray?.Dispose();
+            _showSignal?.Dispose();
             _services?.GetService<IFileWatcherService>()?.Dispose();
             _services?.Dispose();                 // SettingsService.Dispose сохраняет настройки
             if (_ownsMutex) _singleInstance?.ReleaseMutex();

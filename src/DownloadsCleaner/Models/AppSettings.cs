@@ -63,6 +63,10 @@ public sealed partial class AppSettings : ObservableObject
     [ObservableProperty] private bool _allowPermanentDelete;
     /// <summary>При запуске спрашивать у GitHub, нет ли новой версии (одна короткая проверка).</summary>
     [ObservableProperty] private bool _checkUpdatesOnStartup = true;
+    /// <summary>Крестик прячет окно в трей (программа продолжает следить за загрузками).</summary>
+    [ObservableProperty] private bool _minimizeToTray = true;
+    /// <summary>Подсказка «программа работает в фоне» уже показана (показывается один раз).</summary>
+    [ObservableProperty] private bool _trayHintShown;
     /// <summary>Версия, для которой пройден тур по программе: при обновлении тур показывается снова.</summary>
     [ObservableProperty] private string _lastTourVersion = string.Empty;
 

@@ -281,6 +281,18 @@ internal static class StringsEn
         ["DupCopyMany"] = "copies",
         ["DupExtra"] = "Extra: {0}",
         ["DupMarkedPrefix"] = "Copies marked: ",
+        // ---------- Tray and autostart ----------
+        ["TrayOpen"] = "Open Downloads Cleaner",
+        ["TrayScan"] = "Scan",
+        ["TrayExit"] = "Exit",
+        ["TrayHintTitle"] = "Downloads Cleaner keeps running",
+        ["TrayHintText"] = "Icon next to the clock: click to bring the window back, right-click for the menu and Exit.",
+        ["SettingsMinimizeToTray"] = "Minimize to tray on close",
+        ["SettingsMinimizeToTrayHint"] = "The close button hides the window next to the clock and the app keeps watching downloads. To quit, right-click the icon.",
+        ["SettingsAutostart"] = "Start with Windows",
+        ["SettingsAutostartHint"] = "The app starts straight to the tray and watches for new downloads.",
+        ["SettingsAutostartDevHint"] = "Available in the installed version: a copy run from source is not added to startup.",
+
         // ---------- Themes ----------
         ["SettingsThemeHint"] = "The app recolors instantly. \"Follow Windows\" matches the system light or dark mode.",
         ["ThemeMidnight"] = "Midnight",

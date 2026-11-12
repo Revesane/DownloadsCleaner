@@ -124,7 +124,12 @@ public sealed class GitHubUpdateService : IUpdateService
 
         // Новая копия дождётся закрытия этой (иначе сработает защита от второго экземпляра).
         Process.Start(new ProcessStartInfo(_exePath, $"--wait-pid {Environment.ProcessId}") { UseShellExecute = false });
-        System.Windows.Application.Current?.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
+        // Настоящий выход, а не сворачивание в трей по крестику.
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        {
+            if (System.Windows.Application.Current is App app) app.ExitApplication();
+            else System.Windows.Application.Current.Shutdown();
+        });
     }
 
     private async Task DownloadAsync(string url, string target, long expected, IProgress<double>? progress, CancellationToken ct)
