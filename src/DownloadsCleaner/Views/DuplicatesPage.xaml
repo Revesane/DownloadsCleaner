@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
              xmlns:m="clr-namespace:DownloadsCleaner.Animations"
+             xmlns:ctl="clr-namespace:DownloadsCleaner.Controls"
              xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels">
     <UserControl.Resources>
         <Style x:Key="GroupItemStyle" TargetType="ListBoxItem">
@@ -24,9 +25,24 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,14">
-            <TextBlock Text="{loc:T NavDuplicates}" Style="{StaticResource TextTitle}"/>
-            <TextBlock Text="{Binding Summary}" Style="{StaticResource TextSecondary}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+        <StackPanel Grid.Row="0">
+            <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="{loc:T NavDuplicates}" Style="{StaticResource TextTitle}"/>
+                    <TextBlock Text="{Binding Summary}" Style="{StaticResource TextSecondary}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+                <ctl:HintButton Grid.Column="1" HintId="duplicates" Style="{StaticResource GhostButton}" Padding="12,8" VerticalAlignment="Center"/>
+            </Grid>
+            <ctl:HintPanel HintId="duplicates" TitleKey="HintDupTitle">
+                <ctl:HintStep Glyph="&#xE8CB;" TitleKey="HintDup1Title" TextKey="HintDup1Text"/>
+                <ctl:HintStep Glyph="&#xE71C;" TitleKey="HintDup2Title" TextKey="HintDup2Text"/>
+                <ctl:HintStep Glyph="&#xE8EF;" TitleKey="HintDup3Title" TextKey="HintDup3Text"/>
+                <ctl:HintStep Glyph="&#xE8C8;" TitleKey="HintDup4Title" TextKey="HintDup4Text"/>
+            </ctl:HintPanel>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,14">

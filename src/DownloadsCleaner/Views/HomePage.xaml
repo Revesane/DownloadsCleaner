@@ -19,14 +19,24 @@
                     <TextBlock Text="{Binding FolderPath}" Style="{StaticResource TextSecondary}" Margin="0,4,0,0"
                                TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
-                <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Command="{Binding ScanCommand}"
-                        VerticalAlignment="Center" Padding="18,10">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE72C;" Style="{StaticResource IconText}" Foreground="White" FontSize="14"/>
-                        <TextBlock Text="{loc:T HomeScanAgain}" Margin="9,0,0,0"/>
-                    </StackPanel>
-                </Button>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ctl:HintButton HintId="home" Style="{StaticResource GhostButton}" Padding="12,10" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding ScanCommand}" Padding="18,10">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE72C;" Style="{StaticResource IconText}" Foreground="White" FontSize="14"/>
+                            <TextBlock Text="{loc:T HomeScanAgain}" Margin="9,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
             </Grid>
+
+            <!-- Как это работает -->
+            <ctl:HintPanel HintId="home" TitleKey="HintHomeTitle">
+                <ctl:HintStep Glyph="&#xE890;" TitleKey="HintHome1Title" TextKey="HintHome1Text"/>
+                <ctl:HintStep Glyph="&#xE9D9;" TitleKey="HintHome2Title" TextKey="HintHome2Text"/>
+                <ctl:HintStep Glyph="&#xE82F;" TitleKey="HintHome3Title" TextKey="HintHome3Text"/>
+                <ctl:HintStep Glyph="&#xEA18;" TitleKey="HintHome4Title" TextKey="HintHome4Text"/>
+            </ctl:HintPanel>
 
             <!-- Подсказка до первого сканирования -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16"

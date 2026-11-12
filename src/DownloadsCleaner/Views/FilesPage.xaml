@@ -22,9 +22,24 @@
             </Grid.RowDefinitions>
 
             <!-- Заголовок -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,14">
-                <TextBlock Text="{Binding Title}" Style="{StaticResource TextTitle}"/>
-                <TextBlock Text="{Binding Summary}" Style="{StaticResource TextSecondary}" Margin="0,4,0,0"/>
+            <StackPanel Grid.Row="0">
+                <Grid Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Title}" Style="{StaticResource TextTitle}"/>
+                        <TextBlock Text="{Binding Summary}" Style="{StaticResource TextSecondary}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <ctl:HintButton Grid.Column="1" HintId="files" Style="{StaticResource GhostButton}" Padding="12,8" VerticalAlignment="Center"/>
+                </Grid>
+                <ctl:HintPanel HintId="files" TitleKey="HintFilesTitle">
+                    <ctl:HintStep Glyph="&#xE721;" TitleKey="HintFiles1Title" TextKey="HintFiles1Text"/>
+                    <ctl:HintStep Glyph="&#xE8EC;" TitleKey="HintFiles2Title" TextKey="HintFiles2Text"/>
+                    <ctl:HintStep Glyph="&#xE8CB;" TitleKey="HintFiles3Title" TextKey="HintFiles3Text"/>
+                    <ctl:HintStep Glyph="&#xE74D;" TitleKey="HintFiles4Title" TextKey="HintFiles4Text"/>
+                </ctl:HintPanel>
             </StackPanel>
 
             <!-- Панель инструментов -->

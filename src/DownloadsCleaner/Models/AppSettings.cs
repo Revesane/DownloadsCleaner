@@ -60,6 +60,8 @@ public sealed partial class AppSettings : ObservableObject
     public ObservableCollection<string> ExcludedExtensions { get; set; } = new();
     public ObservableCollection<string> ExcludedFolders { get; set; } = new();
     public ObservableCollection<ExtensionRule> CustomRules { get; set; } = new();
+    /// <summary>Подсказки «Как это работает», которые пользователь закрыл кнопкой «Понятно».</summary>
+    public ObservableCollection<string> DismissedHints { get; set; } = new();
 
     [JsonIgnore]
     public string EffectiveSortDestination =>

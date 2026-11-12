@@ -69,6 +69,7 @@ public sealed class SettingsService : ISettingsService, IDisposable
         Hook(s.ExcludedExtensions);
         Hook(s.ExcludedFolders);
         Hook(s.CustomRules);
+        Hook(s.DismissedHints);
         foreach (var r in s.CustomRules) r.PropertyChanged += OnChanged;
     }
 
