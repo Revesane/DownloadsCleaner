@@ -1,8 +1,10 @@
-name: release-windows
+name: release
 
-# Выпуск для Windows: по тегу vX.Y.Z собирает однофайловый self-contained exe с этой версией
-# и создаёт выпуск GitHub с архивом DownloadsCleaner-win-x64.zip.
-# Этот архив скачивает кнопка «Проверить обновления» в программе.
+# Выпуск по тегу vX.Y.Z:
+#  - Windows: тесты, однофайловый exe, установщик DownloadsCleanerSetup.exe (Inno Setup)
+#    и архив DownloadsCleaner-win-x64.zip (его скачивает кнопка обновления в программе);
+#  - macOS: установщики .dmg для Apple Silicon и Intel добавляются к тому же выпуску.
+# Описание выпуска - сообщение аннотированного тега (git tag -a vX.Y.Z -m "…").
 
 on:
   push:
@@ -14,6 +16,7 @@ permissions:
 
 jobs:
   release:
+    name: Windows
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,6 +49,17 @@ jobs:
         shell: pwsh
         run: Compress-Archive -Path publish/win-x64/DownloadsCleaner.exe -DestinationPath publish/DownloadsCleaner-win-x64.zip
 
+      - name: Установщик (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+          }
+          & $iscc "/DAppVersion=${{ steps.ver.outputs.version }}" installer/DownloadsCleaner.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup завершился с ошибкой $LASTEXITCODE" }
+          Get-Item publish/DownloadsCleanerSetup.exe
+
       - name: Выпуск на GitHub
         shell: pwsh
         env:
@@ -53,6 +67,7 @@ jobs:
         run: |
           $tag = "${{ github.ref_name }}"
           $title = "Downloads Cleaner ${{ steps.ver.outputs.version }}"
+          $files = @("publish/DownloadsCleanerSetup.exe", "publish/DownloadsCleaner-win-x64.zip")
           # Описание выпуска - сообщение аннотированного тега (git tag -a vX.Y.Z -m "Что нового…");
           # его показывает и кнопка обновления в программе. Без сообщения - список изменений от GitHub.
           $ref = gh api "repos/${{ github.repository }}/git/ref/tags/$tag" | ConvertFrom-Json
@@ -62,7 +77,33 @@ jobs:
           }
           if ($notes.Length -gt 0) {
             Set-Content -Path notes.md -Value $notes -Encoding utf8
-            gh release create $tag publish/DownloadsCleaner-win-x64.zip --title $title --notes-file notes.md
+            gh release create $tag @files --title $title --notes-file notes.md
           } else {
-            gh release create $tag publish/DownloadsCleaner-win-x64.zip --title $title --generate-notes
+            gh release create $tag @files --title $title --generate-notes
           }
+
+  macos:
+    name: macOS ${{ matrix.rid }}
+    needs: release
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [ osx-arm64, osx-x64 ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Сборка .app и установщика .dmg
+        run: |
+          export VERSION="${GITHUB_REF_NAME#v}"
+          ./build-mac.sh ${{ matrix.rid }}
+
+      - name: Добавить .dmg к выпуску
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" publish/macos/*.dmg --clobber

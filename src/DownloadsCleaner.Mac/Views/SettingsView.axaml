@@ -58,6 +58,20 @@
                 <StackPanel Spacing="10">
                     <TextBlock Text="{loc:T SettingsBehavior}" Classes="heading" />
 
+                    <!-- Открывать при входе в систему (LaunchAgent) -->
+                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasAutostart}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T MacLoginItem}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:T MacLoginItemHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap"
+                                       IsVisible="{Binding AutostartAvailable}" />
+                            <TextBlock Text="{loc:T MacLoginItemDevHint}" Classes="caption" Margin="0,2,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource WarningBrush}" IsVisible="{Binding !AutostartAvailable}" />
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding AutostartEnabled, Mode=TwoWay}" IsEnabled="{Binding AutostartAvailable}" />
+                    </Grid>
+
+                    <Rectangle Height="1" Fill="{DynamicResource StrokeBrush}" IsVisible="{Binding HasAutostart}" />
+
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{loc:T SettingsScanOnStartup}" FontWeight="SemiBold" />

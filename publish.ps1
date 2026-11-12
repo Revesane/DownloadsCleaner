@@ -39,7 +39,22 @@ $zip = Join-Path (Split-Path $Output -Parent) "DownloadsCleaner-win-x64.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path $exe -DestinationPath $zip
 
+# Установщик - если установлен Inno Setup 6 (https://jrsoftware.org/isinfo.php).
+$iscc = @("$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") |
+    Where-Object { Test-Path $_ } | Select-Object -First 1
+$setup = $null
+if ($iscc) {
+    Write-Host "== Установщик ==" -ForegroundColor Cyan
+    $version = (Get-Item $exe).VersionInfo.ProductVersion -replace '\+.*$', ''
+    & $iscc /Q "/DAppVersion=$version" "/DSourceExe=$((Resolve-Path $exe).Path)" "/O$(Split-Path $Output -Parent)" installer\DownloadsCleaner.iss
+    if ($LASTEXITCODE -ne 0) { throw "Inno Setup завершился с ошибкой $LASTEXITCODE" }
+    $setup = Join-Path (Split-Path $Output -Parent) "DownloadsCleanerSetup.exe"
+} else {
+    Write-Host "Inno Setup 6 не найден - установщик пропущен." -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "Готово:" -ForegroundColor Green
 Write-Host "  $((Resolve-Path $exe).Path)  ($([math]::Round((Get-Item $exe).Length / 1MB, 1)) МБ)"
 Write-Host "  $((Resolve-Path $zip).Path)"
+if ($setup) { Write-Host "  $((Resolve-Path $setup).Path)" }

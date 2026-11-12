@@ -73,6 +73,7 @@ public partial class App : Application
         s.AddSingleton<DuplicatesViewModel>();
         s.AddSingleton<HistoryViewModel>();
         s.AddSingleton<AnalyticsViewModel>();
+        s.AddSingleton<IAutostartService, MacAutostartService>();
         s.AddSingleton<SettingsViewModel>();
         s.AddSingleton<ShellViewModel>();
     }

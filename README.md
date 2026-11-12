@@ -16,8 +16,16 @@
 
 ### Скачать
 
-Готовый `DownloadsCleaner.exe` лежит на странице
-[Releases](https://github.com/Revesane/DownloadsCleaner/releases) (архив `DownloadsCleaner-win-x64.zip`).
+На странице [Releases](https://github.com/Revesane/DownloadsCleaner/releases):
+
+* **Windows — `DownloadsCleanerSetup.exe`**: установщик без прав администратора (программа ставится
+  в `%LocalAppData%\Programs\DownloadsCleaner`), ярлык в «Пуске» и по желанию на рабочем столе,
+  галочка «Запускать вместе с Windows», удаление через «Приложения». Или `DownloadsCleaner-win-x64.zip` —
+  та же программа без установки.
+* **macOS — `DownloadsCleaner-macOS-AppleSilicon.dmg` / `…-Intel.dmg`**: откройте образ и перетащите
+  программу в «Программы». Открытие при входе в систему — переключатель в настройках. Программа
+  не подписана сертификатом Apple, поэтому при первом запуске macOS спросит разрешение:
+  щёлкните по программе правой кнопкой → «Открыть».
 
 **Обновления.** Настройки → «О программе» → «Проверить обновления»: программа сама скачает новую
 версию с GitHub, заменит свой exe и перезапустится (старый файл остаётся рядом как `.old` до

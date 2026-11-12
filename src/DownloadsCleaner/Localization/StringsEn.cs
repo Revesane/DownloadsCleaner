@@ -293,6 +293,10 @@ internal static class StringsEn
         ["SettingsAutostartHint"] = "The app starts straight to the tray and watches for new downloads.",
         ["SettingsAutostartDevHint"] = "Available in the installed version: a copy run from source is not added to startup.",
 
+        ["MacLoginItem"] = "Open at login",
+        ["MacLoginItemHint"] = "The app starts after you log in to macOS and watches for new downloads right away.",
+        ["MacLoginItemDevHint"] = "Available in the app from the .dmg: a copy run from source is not added to login items.",
+
         // ---------- Themes ----------
         ["SettingsThemeHint"] = "The app recolors instantly. \"Follow Windows\" matches the system light or dark mode.",
         ["ThemeMidnight"] = "Midnight",

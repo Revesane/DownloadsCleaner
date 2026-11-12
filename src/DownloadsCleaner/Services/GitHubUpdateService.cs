@@ -120,6 +120,7 @@ public sealed class GitHubUpdateService : IUpdateService
 
         ct.ThrowIfCancellationRequested();
         SwapExecutable(_exePath, newExe);
+        UpdateInstalledVersion(Path.GetDirectoryName(_exePath)!, update.Version);
         _log.Info($"Обновление до {update.Version} установлено, перезапуск");
 
         // Новая копия дождётся закрытия этой (иначе сработает защита от второго экземпляра).
@@ -189,6 +190,31 @@ public sealed class GitHubUpdateService : IUpdateService
             File.Move(old, currentExe);
             throw;
         }
+    }
+
+    /// <summary>Идентификатор из installer\DownloadsCleaner.iss (AppId).</summary>
+    internal const string InstallerAppId = "6E1B7D42-3F9A-4C1E-9B57-2D8A4C0F7E31";
+    private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\{" + InstallerAppId + "}_is1";
+
+    /// <summary>
+    /// Если программа поставлена установщиком, после самообновления поправляет версию в
+    /// «Приложениях» Windows - иначе там навсегда осталась бы версия из установщика.
+    /// Копию, распакованную из архива (без записи установщика), не трогает.
+    /// </summary>
+    internal static void UpdateInstalledVersion(string appDir, Version version, string uninstallKey = UninstallKey)
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(uninstallKey, writable: true);
+            if (key?.GetValue("InstallLocation") is not string location) return;
+            // Запись должна относиться именно к этой папке, а не к другой копии программы.
+            if (!string.Equals(Path.GetFullPath(location).TrimEnd('\\'), Path.GetFullPath(appDir).TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
+                return;
+            var text = version.ToString(3);
+            key.SetValue("DisplayVersion", text);
+            key.SetValue("DisplayName", "Downloads Cleaner");
+        }
+        catch { /* не мешаем обновлению */ }
     }
 
     /// <summary>
