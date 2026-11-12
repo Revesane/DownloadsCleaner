@@ -522,7 +522,9 @@ public sealed partial class FileListViewModel : ObservableObject
         {
             if (s.Category != null && f.Category != s.Category) continue;
             if (ageLimit != null && f.Created >= ageLimit) continue;
-            if (sizeLimit != null && f.Size <= sizeLimit) continue;
+            // Граница как в статистике главной страницы (Size >= 100 МБ), иначе счётчик
+            // «Крупные» и отфильтрованный список расходились на файлах ровно 100 МБ.
+            if (sizeLimit != null && f.Size < sizeLimit) continue;
             if (search.Length > 0
                 && !f.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
                 && !string.Equals(f.Extension, searchExt, StringComparison.OrdinalIgnoreCase)) continue;

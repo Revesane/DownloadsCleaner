@@ -195,17 +195,20 @@ public sealed partial class DuplicatesViewModel : ObservableObject, IDisposable
         _marked.Clear();
         foreach (var g in _library.Duplicates)
         {
-            var keep = (KeepStrategy)Strategy switch
-            {
-                KeepStrategy.Newest => g.Files.OrderByDescending(f => f.Created).First(),
-                KeepStrategy.ShortestPath => g.Files.OrderBy(f => f.FullPath.Length).First(),
-                _ => g.Files.OrderBy(f => f.Created).First()
-            };
+            var keep = PickKeep(g);
             foreach (var f in g.Files)
                 if (!ReferenceEquals(f, keep)) _marked.Add(f.FullPath);
         }
         Rebuild(keepMarks: true);
     }
+
+    /// <summary>Копия, которую оставляет выбранная стратегия.</summary>
+    private FileEntry PickKeep(DuplicateGroup g) => (KeepStrategy)Strategy switch
+    {
+        KeepStrategy.Newest => g.Files.OrderByDescending(f => f.Created).First(),
+        KeepStrategy.ShortestPath => g.Files.OrderBy(f => f.FullPath.Length).First(),
+        _ => g.Files.OrderBy(f => f.Created).First()
+    };
 
     [RelayCommand]
     private void ClearMarks()
@@ -217,7 +220,25 @@ public sealed partial class DuplicatesViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task DeleteMarkedAsync()
     {
-        var files = Groups.SelectMany(g => g.Files).Where(f => f.IsMarked).Select(f => f.Entry).ToList();
+        var files = new List<FileEntry>();
+        var skippedGroups = 0;
+        foreach (var g in Groups)
+        {
+            var marked = g.Files.Where(f => f.IsMarked).Select(f => f.Entry).ToList();
+            if (marked.Count == 0) continue;
+            // Удаляем копии, только если на диске точно остаётся неотмеченный экземпляр:
+            // оставленную копию могли удалить или переместить вне программы, а список
+            // ещё не успел обновиться. Иначе пропали бы все копии файла.
+            if (!g.Files.Any(f => !f.IsMarked && File.Exists(f.FullPath)))
+            {
+                skippedGroups++;
+                continue;
+            }
+            files.AddRange(marked);
+        }
+
+        if (skippedGroups > 0)
+            _toasts.Warning(Loc.T("DupKeptMissingTitle"), Loc.F("DupKeptMissingText", skippedGroups.ToString("N0")));
         if (files.Count == 0) return;
         await _operations.DeleteAsync(files);
     }
@@ -249,13 +270,22 @@ public sealed partial class DuplicatesViewModel : ObservableObject, IDisposable
         MarkedBytesText = ByteFormatter.Format(files.Sum(f => f.Entry.Size));
     }
 
-    private void Rebuild(bool keepMarks)
+    internal void Rebuild(bool keepMarks)
     {
         if (!keepMarks) _marked.Clear();
         var groups = _library.Duplicates;
         // Удалённые файлы больше не отмечены.
         var alive = new HashSet<string>(groups.SelectMany(g => g.Files).Select(f => f.FullPath), StringComparer.OrdinalIgnoreCase);
         _marked.RemoveWhere(p => !alive.Contains(p));
+
+        // В каждой группе должна остаться хотя бы одна копия. Если оставленный экземпляр
+        // исчез (удалён вне программы), все оставшиеся копии оказались бы отмеченными -
+        // снимаем отметку с той, которую выбрала бы текущая стратегия.
+        foreach (var g in groups)
+        {
+            if (g.Files.Count > 0 && g.Files.All(f => _marked.Contains(f.FullPath)))
+                _marked.Remove(PickKeep(g).FullPath);
+        }
 
         Groups.Clear();
         foreach (var g in groups)

@@ -281,6 +281,8 @@ internal static class StringsRu
         ["DupCopyMany"] = "копий",
         ["DupExtra"] = "Лишнее: {0}",
         ["DupMarkedPrefix"] = "Отмечено копий: ",
+        ["DupKeptMissingTitle"] = "Часть копий не удалена",
+        ["DupKeptMissingText"] = "Групп пропущено: {0}. Оставляемая копия больше не найдена на диске — повторите поиск дубликатов.",
 
         // ---------- Аналитика ----------
         ["AnalyticsTitle"] = "Аналитика места",

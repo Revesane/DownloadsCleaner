@@ -281,6 +281,8 @@ internal static class StringsEn
         ["DupCopyMany"] = "copies",
         ["DupExtra"] = "Extra: {0}",
         ["DupMarkedPrefix"] = "Copies marked: ",
+        ["DupKeptMissingTitle"] = "Some copies were not deleted",
+        ["DupKeptMissingText"] = "Groups skipped: {0}. The copy to keep is no longer on disk — run the duplicate search again.",
 
         // ---------- Analytics ----------
         ["AnalyticsTitle"] = "Space analytics",
