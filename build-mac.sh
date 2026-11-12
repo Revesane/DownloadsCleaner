@@ -117,7 +117,13 @@ if command -v hdiutil >/dev/null 2>&1 && [ -d "$OUT/Downloads Cleaner.app" ]; th
   cp -R "$OUT/Downloads Cleaner.app" "$STAGE/"
   ln -s /Applications "$STAGE/Applications"
   rm -f "$DMG"
-  hdiutil create -volname "Downloads Cleaner" -srcfolder "$STAGE" -ov -format UDZO "$DMG"
+  # hdiutil иногда падает с «Resource busy» (диск занят проверкой системы) - пробуем ещё раз.
+  for attempt in 1 2 3 4 5; do
+    if hdiutil create -volname "Downloads Cleaner" -srcfolder "$STAGE" -ov -format UDZO "$DMG"; then break; fi
+    if [ "$attempt" = 5 ]; then exit 1; fi
+    echo "hdiutil не справился (попытка $attempt), повтор через 5 с..."
+    sleep 5
+  done
   rm -rf "$STAGE"
 else
   echo "(.dmg собирается только на macOS - пропущено)"
