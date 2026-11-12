@@ -94,9 +94,10 @@ PLIST
 # Предупреждение «не удалось проверить разработчика» при первом запуске всё равно будет.
 if command -v codesign >/dev/null 2>&1; then
   echo "== Подпись (ad-hoc) =="
-  # Сначала каждый исполняемый файл и библиотеку (.dylib) внутри, потом сам пакет.
-  find "$APP/Contents/MacOS" -type f | while IFS= read -r f; do
-    if file -b "$f" | grep -q "Mach-O"; then codesign --force --sign - "$f"; fi
+  # Сначала каждый файл в Contents/MacOS (и .dylib, и .dll/.json - иначе codesign считает
+  # их неподписанными вложениями), кроме главного исполняемого, потом сам пакет.
+  find "$APP/Contents/MacOS" -type f ! -name "$EXE" | while IFS= read -r f; do
+    codesign --force --sign - "$f"
   done
   codesign --force --sign - "$APP"
   codesign --verify --deep --strict --verbose=2 "$APP"
