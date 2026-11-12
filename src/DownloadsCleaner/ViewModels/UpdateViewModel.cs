@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DownloadsCleaner.Helpers;
@@ -15,7 +16,7 @@ public enum UpdateState { Idle, Checking, UpToDate, Available, Downloading, Erro
 /// </summary>
 public sealed partial class UpdateViewModel : ObservableObject
 {
-    private const int MaxNotesLength = 600;
+    private const int MaxNotesLength = 1000;
 
     private readonly IUpdateService _service;
     private readonly ISettingsService _settings;
@@ -129,6 +130,34 @@ public sealed partial class UpdateViewModel : ObservableObject
     /// <summary>Адрес выпусков для ссылки; совпадает с репозиторием сервиса обновлений Windows.</summary>
     public const string GitHubRepository = "Revesane/DownloadsCleaner";
 
+    /// <summary>
+    /// Описание выпуска с GitHub написано в Markdown: убираем разметку (**, #, `), списки делаем «•»,
+    /// от ссылок оставляем текст, служебную строку «Full Changelog» прячем - для неё есть кнопка
+    /// «Страница выпуска».
+    /// </summary>
+    internal static string CleanNotes(string markdown)
+    {
+        var lines = new List<string>();
+        foreach (var raw in markdown.Replace("\r\n", "\n").Split('\n'))
+        {
+            var line = raw.Trim();
+            if (line.Length == 0)
+            {
+                if (lines.Count > 0 && lines[^1].Length > 0) lines.Add(string.Empty);
+                continue;
+            }
+            if (line.StartsWith("<!--", StringComparison.Ordinal)) continue;
+            if (Regex.IsMatch(line, @"^\W*full changelog", RegexOptions.IgnoreCase)) continue;
+
+            line = Regex.Replace(line, @"^#{1,6}\s*", string.Empty);
+            line = Regex.Replace(line, @"^[-*+]\s+", "• ");
+            line = Regex.Replace(line, @"\[([^\]]+)\]\([^)]*\)", "$1");
+            line = line.Replace("**", string.Empty).Replace("__", string.Empty).Replace("`", string.Empty);
+            lines.Add(line);
+        }
+        return string.Join("\n", lines).Trim();
+    }
+
     private void RefreshText()
     {
         StatusText = State switch
@@ -140,7 +169,7 @@ public sealed partial class UpdateViewModel : ObservableObject
             UpdateState.Error => Loc.T("UpdFailed"),
             _ => Loc.F("UpdCurrent", CurrentVersionText)
         };
-        var notes = Available?.Notes?.Trim() ?? string.Empty;
+        var notes = CleanNotes(Available?.Notes ?? string.Empty);
         Notes = State == UpdateState.Available && notes.Length > 0
             ? (notes.Length > MaxNotesLength ? notes[..MaxNotesLength] + "…" : notes)
             : string.Empty;

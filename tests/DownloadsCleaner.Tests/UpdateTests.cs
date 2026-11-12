@@ -194,6 +194,13 @@ public class UpdateViewModelTests
     }
 
     [Fact]
+    public void Release_notes_are_shown_without_markdown()
+    {
+        var md = "## What's Changed\n* **Новое**: темы by [@me](https://x)\n\n**Full Changelog**: https://github.com/x/compare/v1...v2";
+        Assert.Equal("What's Changed\n• Новое: темы by @me", UpdateViewModel.CleanNotes(md));
+    }
+
+    [Fact]
     public async Task Startup_check_respects_the_setting()
     {
         using var tmp = new TempDir();

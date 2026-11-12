@@ -50,6 +50,19 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release create "${{ github.ref_name }}" publish/DownloadsCleaner-win-x64.zip
-          --title "Downloads Cleaner ${{ steps.ver.outputs.version }}" --generate-notes
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $title = "Downloads Cleaner ${{ steps.ver.outputs.version }}"
+          # Описание выпуска - сообщение аннотированного тега (git tag -a vX.Y.Z -m "Что нового…");
+          # его показывает и кнопка обновления в программе. Без сообщения - список изменений от GitHub.
+          $ref = gh api "repos/${{ github.repository }}/git/ref/tags/$tag" | ConvertFrom-Json
+          $notes = ""
+          if ($ref.object.type -eq "tag") {
+            $notes = (gh api "repos/${{ github.repository }}/git/tags/$($ref.object.sha)" --jq .message).Trim()
+          }
+          if ($notes.Length -gt 0) {
+            Set-Content -Path notes.md -Value $notes -Encoding utf8
+            gh release create $tag publish/DownloadsCleaner-win-x64.zip --title $title --notes-file notes.md
+          } else {
+            gh release create $tag publish/DownloadsCleaner-win-x64.zip --title $title --generate-notes
+          }
