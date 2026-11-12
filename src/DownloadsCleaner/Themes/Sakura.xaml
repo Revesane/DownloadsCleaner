@@ -1,0 +1,53 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Скин «Сакура»: те же токены, что в Dark.xaml (DynamicResource), другая палитра. -->
+    <SolidColorBrush x:Key="BgBaseBrush" Color="#FBF4F7"/>
+    <SolidColorBrush x:Key="BgSidebarBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BgCardBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BgCardHoverBrush" Color="#FDF7FA"/>
+    <SolidColorBrush x:Key="BgInputBrush" Color="#F7ECF1"/>
+    <SolidColorBrush x:Key="BgElevatedBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="StrokeBrush" Color="#F0DCE5"/>
+    <SolidColorBrush x:Key="StrokeStrongBrush" Color="#DDB8C8"/>
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#2A1720"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B4A59"/>
+    <SolidColorBrush x:Key="TextMutedBrush" Color="#A08391"/>
+    <SolidColorBrush x:Key="HoverOverlayBrush" Color="#0C000000"/>
+    <SolidColorBrush x:Key="PressOverlayBrush" Color="#16000000"/>
+    <SolidColorBrush x:Key="SelectedBrush" Color="#22DB2777"/>
+    <SolidColorBrush x:Key="TextSecondarySoftBrush" Color="#1C6B4A59"/>
+    <LinearGradientBrush x:Key="CardGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FFFFFF" Offset="0"/>
+        <GradientStop Color="#FCF5F8" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="CardEdgeBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+        <GradientStop Color="#10000000" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="HeroGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#3AEC4899" Offset="0"/>
+        <GradientStop Color="#22A855F7" Offset="0.6"/>
+        <GradientStop Color="#08FFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="ScrimBrush" Color="#8C2A1720"/>
+
+    <Color x:Key="AccentColor">#DB2777</Color>
+    <Color x:Key="AccentBlueColor">#9333EA</Color>
+    <SolidColorBrush x:Key="AccentBrush" Color="#DB2777"/>
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="#9333EA"/>
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="#1EDB2777"/>
+    <SolidColorBrush x:Key="AccentBlueSoftBrush" Color="#1E9333EA"/>
+    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#EC4899" Offset="0"/>
+        <GradientStop Color="#A855F7" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="OnAccentBrush" Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="SuccessBrush" Color="#0EA574"/>
+    <SolidColorBrush x:Key="SuccessSoftBrush" Color="#1C0EA574"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="#D98E04"/>
+    <SolidColorBrush x:Key="WarningSoftBrush" Color="#1CD98E04"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="#E04848"/>
+    <SolidColorBrush x:Key="DangerSoftBrush" Color="#1CE04848"/>
+    <Color x:Key="ShadowColor">#2A1720</Color>
+</ResourceDictionary>

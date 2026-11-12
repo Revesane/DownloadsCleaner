@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:DownloadsCleaner.Localization"
              xmlns:m="clr-namespace:DownloadsCleaner.Animations"
+             xmlns:vm="clr-namespace:DownloadsCleaner.ViewModels"
              xmlns:ctl="clr-namespace:DownloadsCleaner.Controls"
              xmlns:models="clr-namespace:DownloadsCleaner.Models">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
@@ -125,14 +126,67 @@
                 <Border Style="{StaticResource Card}" Margin="0,0,0,14" Padding="22,14" m:Motion.Entrance="FadeUp" m:Motion.EntranceDelay="160">
                     <StackPanel>
                     <TextBlock Style="{StaticResource TextHeading}" Text="{loc:T SettingsAppearance}" Margin="0,4,0,4"/>
-                    <Grid Margin="0,9">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                        <StackPanel Margin="0,0,20,0" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource TextBody}" FontWeight="SemiBold" Text="{loc:T SettingsTheme}"/>
-                            
-                        </StackPanel>
-                        <ContentControl Grid.Column="1" VerticalAlignment="Center"><ComboBox Style="{StaticResource ModernComboBox}" MinWidth="190" Height="36" ItemsSource="{Binding ThemeOptions}" ItemTemplate="{StaticResource OptionItemTemplate}" SelectedValue="{Binding ThemeValue}" SelectedValuePath="Value"/></ContentControl>
-                    </Grid>
+                    <StackPanel Margin="0,9">
+                        <TextBlock Style="{StaticResource TextBody}" FontWeight="SemiBold" Text="{loc:T SettingsTheme}"/>
+                        <TextBlock Style="{StaticResource TextCaption}" TextWrapping="Wrap" Margin="0,2,0,10" Text="{loc:T SettingsThemeHint}"/>
+                        <!-- Галерея тем: мини-окно в цветах темы, выбранная обведена акцентом -->
+                        <ItemsControl ItemsSource="{Binding ThemeCards}" Focusable="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:ThemeCard}">
+                                    <Button Command="{Binding DataContext.SelectThemeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" Margin="0,0,12,12" Cursor="Hand" ToolTip="{Binding Label}"
+                                            m:Motion.HoverScale="1.04" m:Motion.PressScale="0.97">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <ContentPresenter/>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <StackPanel Width="126">
+                                            <Grid>
+                                                <!-- Мини-окно -->
+                                                <Border Height="78" CornerRadius="12" Background="{Binding Background}" BorderThickness="1"
+                                                        BorderBrush="{DynamicResource StrokeBrush}" ClipToBounds="True">
+                                                    <Grid Margin="10">
+                                                        <Border CornerRadius="7" Background="{Binding Card}" Padding="8,7">
+                                                            <StackPanel>
+                                                                <Border Height="8" CornerRadius="4" Width="56" HorizontalAlignment="Left">
+                                                                    <Border.Background>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                                            <GradientStop Color="{Binding AccentFrom}" Offset="0"/>
+                                                                            <GradientStop Color="{Binding AccentTo}" Offset="1"/>
+                                                                        </LinearGradientBrush>
+                                                                    </Border.Background>
+                                                                </Border>
+                                                                <Border Height="5" CornerRadius="2.5" Width="72" Margin="0,7,0,0" HorizontalAlignment="Left"
+                                                                        Background="{Binding AccentTo}" Opacity="0.35"/>
+                                                                <Border Height="5" CornerRadius="2.5" Width="44" Margin="0,5,0,0" HorizontalAlignment="Left"
+                                                                        Background="{Binding AccentFrom}" Opacity="0.25"/>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+                                                <!-- Выбранная тема: акцентная рамка и галочка -->
+                                                <Border CornerRadius="12" BorderThickness="2" BorderBrush="{DynamicResource AccentBrush}"
+                                                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}"
+                                                        m:Motion.Entrance="Pop" m:Motion.EntranceRepeat="True"/>
+                                                <Border Width="22" Height="22" CornerRadius="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-6,-6,0"
+                                                        Background="{DynamicResource AccentGradientBrush}"
+                                                        Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}"
+                                                        m:Motion.Entrance="Pop" m:Motion.EntranceRepeat="True">
+                                                    <TextBlock Text="&#xE73E;" Style="{StaticResource IconText}" FontSize="11" Foreground="White"/>
+                                                </Border>
+                                            </Grid>
+                                            <TextBlock Text="{Binding Label}" Style="{StaticResource TextBody}" Margin="2,8,0,0" TextTrimming="CharacterEllipsis"
+                                                       FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                     <Border Height="1" Background="{DynamicResource StrokeBrush}"/>
                     <Grid Margin="0,9">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>

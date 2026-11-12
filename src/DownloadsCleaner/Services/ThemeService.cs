@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using DownloadsCleaner.Helpers;
 using DownloadsCleaner.Models;
 using Microsoft.Win32;
@@ -25,18 +26,37 @@ public sealed class ThemeService : IThemeService, IDisposable
 
     public void Dispose() => SystemEvents.UserPreferenceChanged -= _preferenceChanged;
 
+    /// <summary>Файл палитры для темы (Themes/{имя}.xaml). «Системная» - светлая или тёмная по Windows.</summary>
+    internal static string PaletteName(AppTheme theme, bool systemLight) => theme switch
+    {
+        AppTheme.Light => "Light",
+        AppTheme.System => systemLight ? "Light" : "Dark",
+        AppTheme.Midnight => "Midnight",
+        AppTheme.Forest => "Forest",
+        AppTheme.Sunset => "Sunset",
+        AppTheme.Sakura => "Sakura",
+        _ => "Dark"
+    };
+
+    private static readonly string[] Palettes = { "Dark", "Light", "Midnight", "Forest", "Sunset", "Sakura" };
+
     public void Apply(AppTheme theme)
     {
         var app = Application.Current;
         if (app == null) return;
 
-        var light = theme == AppTheme.Light || (theme == AppTheme.System && SystemUsesLightTheme());
-        var uri = new Uri($"/DownloadsCleaner;component/Themes/{(light ? "Light" : "Dark")}.xaml", UriKind.Relative);
+        var name = PaletteName(theme, theme == AppTheme.System && SystemUsesLightTheme());
+        var uri = new Uri($"/DownloadsCleaner;component/Themes/{name}.xaml", UriKind.Relative);
         var dict = new ResourceDictionary { Source = uri };
 
         var merged = app.Resources.MergedDictionaries;
         var existing = merged.FirstOrDefault(d => d.Source != null &&
-            (d.Source.OriginalString.EndsWith("Themes/Dark.xaml") || d.Source.OriginalString.EndsWith("Themes/Light.xaml")));
+            Palettes.Any(p => d.Source.OriginalString.EndsWith($"Themes/{p}.xaml", StringComparison.OrdinalIgnoreCase)));
+        if (existing?.Source?.OriginalString.EndsWith($"Themes/{name}.xaml", StringComparison.OrdinalIgnoreCase) == true)
+            return;                                   // эта палитра уже применена
+
+        // Плавная смена: снимок окна поверх растворяется, открывая уже перекрашенный интерфейс.
+        var fade = CaptureForCrossfade(app.MainWindow);
         if (existing != null)
         {
             var index = merged.IndexOf(existing);
@@ -51,6 +71,48 @@ public sealed class ThemeService : IThemeService, IDisposable
         // (состояние приложения, тосты) - нет: конвертер не получает уведомления о смене
         // словаря ресурсов. Поэтому перечитываем привязки явно.
         BindingRefresh.Refresh(app.MainWindow);
+        fade?.Invoke();
+    }
+
+    /// <summary>
+    /// Кладёт поверх окна его снимок со старыми цветами и возвращает действие, которое этот снимок
+    /// растворяет (после смены палитры). Без анимаций или до показа окна - ничего не делает.
+    /// </summary>
+    private static Action? CaptureForCrossfade(Window? window)
+    {
+        try
+        {
+            if (!Animations.MotionSettings.Enabled || window is not { IsLoaded: true, Content: Panel root }
+                || root.ActualWidth <= 0 || root.ActualHeight <= 0)
+                return null;
+
+            var dpi = System.Windows.Media.VisualTreeHelper.GetDpi(root);
+            var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                (int)Math.Ceiling(root.ActualWidth * dpi.DpiScaleX), (int)Math.Ceiling(root.ActualHeight * dpi.DpiScaleY),
+                dpi.PixelsPerInchX, dpi.PixelsPerInchY, System.Windows.Media.PixelFormats.Pbgra32);
+            bitmap.Render(root);
+            bitmap.Freeze();
+
+            var snapshot = new System.Windows.Controls.Image
+            {
+                Source = bitmap,
+                Stretch = System.Windows.Media.Stretch.Fill,
+                IsHitTestVisible = false
+            };
+            if (root is Grid grid)
+            {
+                if (grid.RowDefinitions.Count > 0) Grid.SetRowSpan(snapshot, grid.RowDefinitions.Count);
+                if (grid.ColumnDefinitions.Count > 0) Grid.SetColumnSpan(snapshot, grid.ColumnDefinitions.Count);
+            }
+            root.Children.Add(snapshot);
+
+            return () => Animations.Anim.To(snapshot, UIElement.OpacityProperty, 0, Animations.MotionSettings.Custom(420),
+                Animations.Anim.EaseInOut, 1, () => root.Children.Remove(snapshot));
+        }
+        catch
+        {
+            return null;                              // снимок - украшение, тема применится и без него
+        }
     }
 
     private static bool SystemUsesLightTheme()

@@ -19,8 +19,9 @@ public sealed class MacThemeService : IThemeService
 
         var variant = theme switch
         {
-            AppTheme.Light => ThemeVariant.Light,
-            AppTheme.Dark => ThemeVariant.Dark,
+            AppTheme.Light or AppTheme.Sakura => ThemeVariant.Light,
+            // Цветные темы есть только в Windows-версии; здесь - ближайшая тёмная.
+            AppTheme.Dark or AppTheme.Midnight or AppTheme.Forest or AppTheme.Sunset => ThemeVariant.Dark,
             _ => SystemUsesLightTheme() ? ThemeVariant.Light : ThemeVariant.Dark
         };
 

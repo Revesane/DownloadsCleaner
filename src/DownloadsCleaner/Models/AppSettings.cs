@@ -4,11 +4,16 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace DownloadsCleaner.Models;
 
+/// <summary>Тема оформления. Значения сохраняются по имени, новые добавляются только в конец.</summary>
 public enum AppTheme
 {
     Dark,
     Light,
-    System
+    System,
+    Midnight,
+    Forest,
+    Sunset,
+    Sakura
 }
 
 /// <summary>Язык интерфейса. Значения фиксированы: они сохраняются в settings.json по имени.</summary>
@@ -58,6 +63,8 @@ public sealed partial class AppSettings : ObservableObject
     [ObservableProperty] private bool _allowPermanentDelete;
     /// <summary>При запуске спрашивать у GitHub, нет ли новой версии (одна короткая проверка).</summary>
     [ObservableProperty] private bool _checkUpdatesOnStartup = true;
+    /// <summary>Версия, для которой пройден тур по программе: при обновлении тур показывается снова.</summary>
+    [ObservableProperty] private string _lastTourVersion = string.Empty;
 
     public ObservableCollection<string> ExcludedExtensions { get; set; } = new();
     public ObservableCollection<string> ExcludedFolders { get; set; } = new();

@@ -45,7 +45,7 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <ListBox Grid.Row="1" Style="{StaticResource PlainListBox}" ItemsSource="{Binding NavItems}"
+                    <ListBox x:Name="NavList" Grid.Row="1" Style="{StaticResource PlainListBox}" ItemsSource="{Binding NavItems}"
                              SelectedItem="{Binding SelectedNav, Mode=TwoWay}" ItemContainerStyle="{StaticResource NavItemStyle}"
                              Margin="12,4" ScrollViewer.VerticalScrollBarVisibility="Auto" Focusable="False">
                         <ListBox.ItemTemplate>
@@ -105,6 +105,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <ctl:TransitioningContentControl Content="{Binding Status.DisplayState}" HorizontalAlignment="Left" VerticalAlignment="Center"
@@ -125,7 +126,14 @@
                         </ctl:TransitioningContentControl.ContentTemplate>
                     </ctl:TransitioningContentControl>
 
-                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Command="{Binding ScanCommand}" Height="34" Padding="14,0"
+                    <Button x:Name="HelpButton" Grid.Column="1" Style="{StaticResource GhostButton}" Click="OnHelp" Height="34" Padding="12,0"
+                            Margin="0,0,6,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="{loc:T MainHelpTip}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE897;" Style="{StaticResource IconText}" FontSize="13" Foreground="{DynamicResource AccentBrush}"/>
+                            <TextBlock Text="{loc:T MainHelp}" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="ScanButton" Grid.Column="2" Style="{StaticResource SecondaryButton}" Command="{Binding ScanCommand}" Height="34" Padding="14,0"
                             Margin="0,0,8,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="{loc:T MainScanTip}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE72C;" Style="{StaticResource IconText}" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
@@ -133,14 +141,14 @@
                             <TextBlock Text="{loc:T HomeScan}" Margin="8,0,0,0"/>
                         </StackPanel>
                     </Button>
-                    <Button Grid.Column="2" Style="{StaticResource PrimaryButton}" Command="{Binding SortAllCommand}" Height="34" Padding="14,0"
+                    <Button x:Name="SortButton" Grid.Column="3" Style="{StaticResource PrimaryButton}" Command="{Binding SortAllCommand}" Height="34" Padding="14,0"
                             Margin="0,0,14,0" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="{loc:T MainSortTip}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8CB;" Style="{StaticResource IconText}" FontSize="13" Foreground="White"/>
                             <TextBlock Text="{loc:T MainSort}" Margin="8,0,0,0"/>
                         </StackPanel>
                     </Button>
-                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Top">
+                    <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Top">
                         <Button Style="{StaticResource WindowButton}" Content="&#xE921;" Click="OnMinimize" ToolTip="{loc:T CommonMinimize}"/>
                         <Button x:Name="MaxButton" Style="{StaticResource WindowButton}" Content="&#xE922;" Click="OnMaximize" ToolTip="{loc:T CommonMaximize}"/>
                         <Button Style="{StaticResource WindowButton}" Content="&#xE8BB;" Click="OnClose" ToolTip="{loc:T CommonClose}"/>
@@ -192,7 +200,7 @@
                 </Border>
 
                 <!-- Текущая страница -->
-                <ctl:TransitioningContentControl Grid.Row="2" Content="{Binding CurrentPage}" IsTabStop="False"
+                <ctl:TransitioningContentControl x:Name="PageHost" Grid.Row="2" Content="{Binding CurrentPage}" IsTabStop="False"
                                                   HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
             </Grid>
         </Grid>
@@ -245,5 +253,8 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <!-- ============ Тур по программе (поверх всего) ============ -->
+        <ctl:TourOverlay x:Name="Tour"/>
     </Grid>
 </Window>

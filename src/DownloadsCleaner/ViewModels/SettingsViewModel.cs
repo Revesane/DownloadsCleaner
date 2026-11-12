@@ -8,6 +8,45 @@ using DownloadsCleaner.Services;
 
 namespace DownloadsCleaner.ViewModels;
 
+/// <summary>Карточка темы в галерее: название и цвета для превью (фон, карточка, градиент акцента).</summary>
+public sealed class ThemeCard : ObservableObject
+{
+    private string _label;
+    private bool _isSelected;
+
+    public ThemeCard(AppTheme theme, string key, string background, string card, string accentFrom, string accentTo)
+    {
+        Theme = theme;
+        Key = key;
+        Background = background;
+        Card = card;
+        AccentFrom = accentFrom;
+        AccentTo = accentTo;
+        _label = Loc.T(key);
+    }
+
+    public AppTheme Theme { get; }
+    public string Key { get; }
+    public string Background { get; }
+    public string Card { get; }
+    public string AccentFrom { get; }
+    public string AccentTo { get; }
+
+    public string Label
+    {
+        get => _label;
+        private set => SetProperty(ref _label, value);
+    }
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        internal set => SetProperty(ref _isSelected, value);
+    }
+
+    internal void RefreshLabel() => Label = Loc.T(Key);
+}
+
 /// <summary>Страница настроек. Изменения применяются сразу и сохраняются автоматически.</summary>
 public sealed partial class SettingsViewModel : ObservableObject
 {
@@ -30,9 +69,37 @@ public sealed partial class SettingsViewModel : ObservableObject
             OnPropertyChanged(nameof(SystemAnimationsBlocked));
         });
         Loc.LanguageChanged += (_, _) => UiThread.Post(RefreshLocalization);
+        Settings.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(AppSettings.Theme)) UpdateThemeSelection();
+        };
+        UpdateThemeSelection();
     }
 
     public AppSettings Settings => _service.Current;
+
+    /// <summary>Галерея тем оформления (Windows): цвета превью совпадают с палитрами Themes/*.xaml.</summary>
+    public IReadOnlyList<ThemeCard> ThemeCards { get; } = new[]
+    {
+        new ThemeCard(AppTheme.Dark, "SettingsThemeDark", "#0D0E13", "#1C1F2A", "#8B5CF6", "#4F8CF0"),
+        new ThemeCard(AppTheme.Light, "SettingsThemeLight", "#F3F4F9", "#FFFFFF", "#7C3AED", "#3B6FE0"),
+        new ThemeCard(AppTheme.Midnight, "ThemeMidnight", "#0A0F1C", "#16213B", "#0284C7", "#4F46E5"),
+        new ThemeCard(AppTheme.Forest, "ThemeForest", "#0B110E", "#17221C", "#059669", "#0D9488"),
+        new ThemeCard(AppTheme.Sunset, "ThemeSunset", "#140D10", "#26181E", "#EA580C", "#DB2777"),
+        new ThemeCard(AppTheme.Sakura, "ThemeSakura", "#FBF4F7", "#FFFFFF", "#EC4899", "#A855F7"),
+        new ThemeCard(AppTheme.System, "SettingsThemeSystem", "#0D0E13", "#FFFFFF", "#8B5CF6", "#4F8CF0")
+    };
+
+    [RelayCommand]
+    private void SelectTheme(ThemeCard? card)
+    {
+        if (card != null) ThemeValue = (int)card.Theme;
+    }
+
+    private void UpdateThemeSelection()
+    {
+        foreach (var card in ThemeCards) card.IsSelected = card.Theme == Settings.Theme;
+    }
     public UpdateViewModel? Updates { get; }
     public bool HasUpdates => Updates != null;
 
@@ -179,6 +246,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private void RefreshLocalization()
     {
         foreach (var option in ThemeOptions) option.RefreshLabel();
+        foreach (var card in ThemeCards) card.RefreshLabel();
         foreach (var option in LanguageOptions) option.RefreshLabel();
         foreach (var option in OldDaysOptions) option.RefreshLabel();
         foreach (var option in ToastSecondsOptions) option.RefreshLabel();
